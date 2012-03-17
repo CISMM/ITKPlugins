@@ -136,13 +136,15 @@ Parser
     iter = memberNode->find( "type" );
     if ( iter != memberNode->end() )
       {
-      std::cout << (*iter)->as_string().c_str() << std::endl;
+      std::string typeName( (*iter)->as_string().c_str() );
+      memberDescription->SetTypeName( typeName );
       }
 
     iter = memberNode->find( "default" );
     if ( iter != memberNode->end() )
       {
-      std::cout << (*iter)->as_string().c_str() << std::endl;
+      std::string defaultValue( (*iter)->as_string().c_str() );
+      memberDescription->SetDefaultValue( defaultValue );
       }
 
     memberIter++;
