@@ -175,6 +175,102 @@ bool
 Slicer4PluginGenerator
 ::GenerateCode()
 {
+  // Open file for writing
+  std::string filePath( m_PluginPath );
+  char lastChar = *( m_PluginPath.rbegin() );
+  if ( lastChar == '/' || lastChar == '\\' )
+    {
+    filePath.append( m_ClassDescription->GetClassName() );
+    }
+  else
+    {
+    // Add delimiter
+#ifdef WIN32
+    filePath.append( "\\" );
+#else
+    filePath.append( "/" );
+#endif
+    filePath.append( m_ClassDescription->GetClassName() );
+    filePath.append( ".cxx" );
+    }
+
+  std::cout << "Writing Slicer4 plugin CXX file for " << m_ClassDescription->GetClassName()
+            << std::endl;
+
+  // Useful variables
+  std::string filterName( m_ClassDescription->GetClassName() );
+  filterName.append( "ImageFilter" );
+
+  std::ofstream os( filePath.c_str() );
+
+  os << "#include \"itkPluginUtilities.h\"\n\n";
+
+  os << "#include <itkImageFileReader.h>\n";
+  os << "#include <itkImageFileWriter.h>\n";
+  os << "#include <itk" << filterName << ".h>\n\n";
+
+  os << "#include \"" << filterName << "CLP.h\n\n";
+
+  os << "namespace\n";
+  os << "{\n\n";
+
+  os << "template< class TInput >\n";
+  os << "int Run( int argc, char * argv[], TInput )\n";
+  os << "{\n\n";
+
+  os << "  PARSE_ARGS;\n\n";
+
+  os << "  typedef itk::Image< TInput,  3 > InputImageType;\n";
+  os << "  typedef itk::Image< TOutput, 3 > OutputImageType;\n\n";
+
+  os << "  typedef itk::ImageFileReader< InputImageType  > InputReaderType;\n";
+  os << "  typedef itk::ImageFileWriter< OutputImageType > OutputWriterType;\n\n";
+
+  os << "  inputReader->SetFileName( inputVolume0.c_str() );\n";
+  os << "  outputWriter->SetFileName( outputVolume.c_str() );\n\n";
+
+  os << "  typedef itk::" << filterName << "< InputImageType, OutputImageType > FilterType;\n";
+  os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
+
+  os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
+
+  os << "  filter->SetInput( inputReader0->GetOutput() );\n";
+
+  // Set parameters
+  for (int i = 0; i < m_ClassDescription->GetNumberOfMemberDescriptions(); ++i)
+    {
+    const MemberDescription * member = m_ClassDescription->GetMemberDescription( i );
+    os << "  filter->Set" << member->GetMemberName() << "( " << member->GetMemberName()
+       << ");\n";
+    }
+
+  os << "\n";
+
+  os << "  outputWriter->SetInput( filter->GetOutput() );\n";
+  os << "  outputWriter->SetUseCompression( 1 );\n";
+  os << "  outputWriter->Update();\n\n";
+
+  os << "  return EXIT_SUCCESS;\n";
+  os << "}\n\n";
+
+  os << "int main( int argc, char* argv[] )\n";
+  os << "{\n\n";
+
+  os << "  PARSE_ARGS;\n\n";
+
+  os << "  itk::ImageIOBase::IOPixelType     pixelType;\n";
+  os << "  itk::ImageIOBase::IOComponentType componentType;\n\n";
+
+  os << "  //#include \"RunDispatchLevelOne.h\"\n\n";
+
+  os << "  return EXIT_SUCCESS;\n";
+  os << "}\n\n";
+
+  os << "} // end namespace\n\n";
+
+
+  os.flush();
+  os.close();
 
   return true;
 }
