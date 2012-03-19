@@ -49,6 +49,9 @@ public:
   }
 
   void AddMember( MemberDescription * memberDescription );
+  const MemberDescription * GetMemberDescription( int index );
+
+  int GetNumberOfMemberDescriptions() const;
 
   void PrintSelf( std::ostream & os );
 

@@ -21,6 +21,21 @@ ClassDescription
   m_Members.push_back( memberDescription );
 }
 
+const MemberDescription *
+ClassDescription
+::GetMemberDescription( int index )
+{
+  // No bounds checking
+  return m_Members[ index ];
+}
+
+int
+ClassDescription
+::GetNumberOfMemberDescriptions() const
+{
+  return static_cast< int >( m_Members.size() );
+}
+
 void
 ClassDescription
 ::PrintSelf( std::ostream & os )

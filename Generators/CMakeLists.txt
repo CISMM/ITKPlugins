@@ -10,8 +10,23 @@ endif()
 
 set( Generator_SRCS
   GeneratePlugins.cxx
-
 )
+
+if ( BUILD_SLICER_PLUGINS )
+  set( Generator_SRCS
+    "${Generator_SRCS}"
+    Slicer4PluginGenerator.h
+    Slicer4PluginGenerator.cxx
+    )
+endif()
+
+if ( BUILD_PARAVIEW_PLUGINS )
+  set( Generator_SRCS
+    "${Generator_SRCS}"
+    ParaView3PluginGenerator.h
+    ParaView3PluginGenerator.cxx
+    )
+endif()
 
 include_directories( ${ITKPlugins_SOURCE_DIR}/Common )
 include_directories( ${ITKPlugins_SOURCE_DIR}/Parser )
