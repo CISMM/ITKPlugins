@@ -10,11 +10,3 @@ if ( BUILD_PARAVIEW3_PLUGINS )
   message( "Building ParaView plugins enabled..." )
   add_subdirectory( ParaView )
 endif()
-
-if ( BUILD_PARAVIEW3_PLUGINS )
-  set( Generator_SRCS
-    "${Generator_SRCS}"
-    ParaView3PluginGenerator.h
-    ParaView3PluginGenerator.cxx
-    )
-endif()
