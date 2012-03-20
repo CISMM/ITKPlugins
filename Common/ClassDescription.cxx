@@ -47,7 +47,7 @@ ClassDescription
 
   os << "PublicDeclarations:  " << m_PublicDeclarations << std::endl;
 
-  for (int i = 0; i < m_Members.size(); ++i)
+  for (unsigned int i = 0; i < m_Members.size(); ++i)
     {
     m_Members[i]->PrintSelf( os );
     }
