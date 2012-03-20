@@ -6,21 +6,21 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
   file( WRITE "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml" )
 
     add_custom_command( OUTPUT "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.cxx"
-      COMMAND "${ITKPlugins_BINARY_DIR}/bin/GeneratePlugins"
+      COMMAND "${ITKPlugins_BINARY_DIR}/bin/GenerateSlicer4Plugin"
         "/Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json"
         "${GENERATED_CODE_DIRECTORY}"
         "--cxx"
-      DEPENDS GeneratePlugins
+      DEPENDS GenerateSlicer4Plugin
       WORKING_DIRECTORY "${ITKPlugins_BINARY_DIR}"
       VERBATIM
       )
 
    add_custom_command( OUTPUT "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
-      COMMAND "${ITKPlugins_BINARY_DIR}/bin/GeneratePlugins"
+      COMMAND "${ITKPlugins_BINARY_DIR}/bin/GenerateSlicer4Plugin"
         "/Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json"
         "${GENERATED_CODE_DIRECTORY}"
         "--xml"
-      DEPENDS GeneratePlugins
+      DEPENDS GenerateSlicer4Plugin
       WORKING_DIRECTORY "${ITKPlugins_BINARY_DIR}"
       VERBATIM
       )

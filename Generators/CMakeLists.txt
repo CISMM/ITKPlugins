@@ -9,7 +9,7 @@ if ( BUILD_PARAVIEW_PLUGINS )
 endif()
 
 set( Generator_SRCS
-  GeneratePlugins.cxx
+  GenerateSlicer4Plugin.cxx
 )
 
 if ( BUILD_SLICER_PLUGINS )
@@ -18,6 +18,15 @@ if ( BUILD_SLICER_PLUGINS )
     Slicer4PluginGenerator.h
     Slicer4PluginGenerator.cxx
     )
+
+  # This is the executable that actually generates the plugin code for Slicer 4
+  add_executable( GenerateSlicer4Plugin ${Generator_SRCS} )
+  target_link_libraries( GenerateSlicer4Plugin
+    Common
+    Parser
+    JSON
+    )
+
 endif()
 
 if ( BUILD_PARAVIEW_PLUGINS )
@@ -30,11 +39,3 @@ endif()
 
 include_directories( ${ITKPlugins_SOURCE_DIR}/Common )
 include_directories( ${ITKPlugins_SOURCE_DIR}/Parser )
-
-# This is the executable that actually generates the plugin code
-add_executable( GeneratePlugins ${Generator_SRCS} )
-target_link_libraries( GeneratePlugins
-  Common
-  Parser
-  JSON
-  )
