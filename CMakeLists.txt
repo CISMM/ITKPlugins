@@ -23,3 +23,19 @@ add_subdirectory( Common )
 add_subdirectory( Generators )
 add_subdirectory( Parser )
 add_subdirectory( Utilities )
+
+# Generate plugin code
+set( Plugin_JSON
+  AddConstantTo
+  DivideByConstant
+)
+
+if ( BUILD_SLICER_PLUGINS )
+
+  set( EXTENSION_NAME ITKPluginsExtension )
+  find_package( Slicer REQUIRED )
+  include( ${Slicer_USE_FILE} )
+
+endif()
+
+add_subdirectory( GeneratedCode )

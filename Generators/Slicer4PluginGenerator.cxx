@@ -55,7 +55,7 @@ Slicer4PluginGenerator
     return false;
     }
 
-  if ( !this->GenerateXMLDescription() )
+  if ( !this->GenerateXML() )
     {
     std::cerr << "Failed to generate XML description for plugin '" << m_PluginPath << "/"
               << m_ClassDescription->GetClassName() << "'.";
@@ -68,20 +68,18 @@ Slicer4PluginGenerator
               << "/" << m_ClassDescription->GetClassName() << "'.";
     return false;
     }
+
+  return true;
 }
 
 bool
 Slicer4PluginGenerator
-::GenerateXMLDescription()
+::GenerateXML()
 {
   // Open file for writing
   std::string filePath( m_PluginPath );
   char lastChar = *( m_PluginPath.rbegin() );
-  if ( lastChar == '/' || lastChar == '\\' )
-    {
-    filePath.append( m_ClassDescription->GetClassName() );
-    }
-  else
+  if ( lastChar != '/' && lastChar != '\\' )
     {
     // Add delimiter
 #ifdef WIN32
@@ -89,9 +87,9 @@ Slicer4PluginGenerator
 #else
     filePath.append( "/" );
 #endif
-    filePath.append( m_ClassDescription->GetClassName() );
-    filePath.append( ".xml" );
     }
+  filePath.append( m_ClassDescription->GetClassName() );
+  filePath.append( ".xml" );
 
   std::cout << "Writing Slicer4 plugin XML file for " << m_ClassDescription->GetClassName()
             << std::endl;
@@ -140,6 +138,15 @@ Slicer4PluginGenerator
     os << "      <description></description>\n";
     os << "    </image>\n";
     }
+
+  os << "    <image>\n";
+  os << "      <name>outputVolume</name>\n";
+  os << "      <label>Output Volume</label>\n";
+  os << "      <channel>output</channel>\n";
+  os << "      <index>0</index>\n";
+  os << "      <description>Filter output</description>\n";
+  os << "    </image>\n";
+
   os << "  </parameters>\n\n";
 
   // Class parameters second
@@ -156,7 +163,7 @@ Slicer4PluginGenerator
       {
       os << "    <double>\n";
       os << "      <name>" << member->GetMemberName() << "</name>\n";
-      os << "      <longFlag>" << member->GetMemberName() << "</longFlag>\n";
+      //os << "      <longFlag>" << member->GetMemberName() << "</longFlag>\n";
       //os << "      <description>" << member->GetBriefDescription() << "</description>\n";
       os << "      <label>" << member->GetMemberName() << "</label>\n";
       os << "      <default>" << member->GetDefaultValue() << "</default>\n";
@@ -178,11 +185,7 @@ Slicer4PluginGenerator
   // Open file for writing
   std::string filePath( m_PluginPath );
   char lastChar = *( m_PluginPath.rbegin() );
-  if ( lastChar == '/' || lastChar == '\\' )
-    {
-    filePath.append( m_ClassDescription->GetClassName() );
-    }
-  else
+  if ( lastChar != '/' || lastChar != '\\' )
     {
     // Add delimiter
 #ifdef WIN32
@@ -190,9 +193,9 @@ Slicer4PluginGenerator
 #else
     filePath.append( "/" );
 #endif
-    filePath.append( m_ClassDescription->GetClassName() );
-    filePath.append( ".cxx" );
     }
+  filePath.append( m_ClassDescription->GetClassName() );
+  filePath.append( ".cxx" );
 
   std::cout << "Writing Slicer4 plugin CXX file for " << m_ClassDescription->GetClassName()
             << std::endl;
@@ -209,7 +212,7 @@ Slicer4PluginGenerator
   os << "#include <itkImageFileWriter.h>\n";
   os << "#include <itk" << filterName << ".h>\n\n";
 
-  os << "#include \"" << filterName << "CLP.h\n\n";
+  os << "#include \"" << m_ClassDescription->GetClassName() << "CLP.h\"\n\n";
 
   os << "namespace\n";
   os << "{\n\n";
@@ -220,21 +223,23 @@ Slicer4PluginGenerator
 
   os << "  PARSE_ARGS;\n\n";
 
-  os << "  typedef itk::Image< TInput,  3 > InputImageType;\n";
-  os << "  typedef itk::Image< TOutput, 3 > OutputImageType;\n\n";
+  os << "  typedef itk::Image< TInput, 3 > InputImageType;\n";
+  os << "  typedef itk::Image< TInput, 3 > OutputImageType;\n\n";
 
   os << "  typedef itk::ImageFileReader< InputImageType  > InputReaderType;\n";
-  os << "  typedef itk::ImageFileWriter< OutputImageType > OutputWriterType;\n\n";
+  os << "  typename InputReaderType::Pointer inputReader = InputReaderType::New();\n";
+  os << "  inputReader->SetFileName( inputVolume0.c_str() );\n\n";
 
-  os << "  inputReader->SetFileName( inputVolume0.c_str() );\n";
+  os << "  typedef itk::ImageFileWriter< OutputImageType > OutputWriterType;\n\n";
+  os << "  typename OutputWriterType::Pointer outputWriter = OutputWriterType::New();\n";
   os << "  outputWriter->SetFileName( outputVolume.c_str() );\n\n";
 
-  os << "  typedef itk::" << filterName << "< InputImageType, OutputImageType > FilterType;\n";
+  os << "  typedef itk::" << filterName << "< InputImageType, InputImageType, InputImageType > FilterType;\n";
   os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
 
   os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
 
-  os << "  filter->SetInput( inputReader0->GetOutput() );\n";
+  os << "  filter->SetInput( inputReader->GetOutput() );\n";
 
   // Set parameters
   for (int i = 0; i < m_ClassDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -253,6 +258,8 @@ Slicer4PluginGenerator
   os << "  return EXIT_SUCCESS;\n";
   os << "}\n\n";
 
+  os << "} // end namespace\n\n";
+
   os << "int main( int argc, char* argv[] )\n";
   os << "{\n\n";
 
@@ -265,8 +272,6 @@ Slicer4PluginGenerator
 
   os << "  return EXIT_SUCCESS;\n";
   os << "}\n\n";
-
-  os << "} // end namespace\n\n";
 
 
   os.flush();

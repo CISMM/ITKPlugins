@@ -17,8 +17,10 @@ public:
   const std::string & GetPluginPath() const;
 
   bool Generate();
-  bool GenerateXMLDescription();
+
+  bool GenerateXML();
   void WriteXMLParameters( std::ostream & os );
+
   bool GenerateCode();
 
 protected:
