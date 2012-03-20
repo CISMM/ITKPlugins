@@ -1,0 +1,29 @@
+ITK Plugins
+
+What it is
+----------
+
+This project aims to provide plugins wrapping functionality in ITK for
+popular applications such as Slicer and ParaView.
+
+How it works
+------------
+
+ITK filters are described in a compact JSON file. Source code for
+plugins is generated automatically with utility programs in this
+project. The approach was inspired from the SimpleITK project
+(www.simpleitk.org).
+
+Who's responsible for this?
+---------------------------
+
+Cory Quammen
+cquammen@cs.unc.edu
+Department of Computer Science
+UNC Chapel Hill
+
+Acknowledgements
+----------------
+
+A number of the JSON description files were copied from the SimpleITK
+project.
