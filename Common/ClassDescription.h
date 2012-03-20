@@ -13,11 +13,18 @@ public:
   ClassDescription();
   virtual ~ClassDescription();
 
-  void SetClassName( const std::string & name ) {
-    m_ClassName = name;
+  void SetPluginName( const std::string & name ) {
+    m_PluginName = name;
   }
-  const std::string & GetClassName() const {
-    return m_ClassName;
+  const std::string & GetPluginName() const {
+    return m_PluginName;
+  }
+
+  void SetITKClassName( const std::string & name ) {
+    m_ITKClassName = name;
+  }
+  const std::string & GetITKClassName() const {
+    return m_ITKClassName;
   }
 
   void SetNumberOfInputs( int numInputs ) {
@@ -56,7 +63,8 @@ public:
   void PrintSelf( std::ostream & os );
 
 protected:
-  std::string m_ClassName;
+  std::string m_PluginName;
+  std::string m_ITKClassName;
   int         m_NumberOfInputs;
   std::string m_BriefDescription;
   std::string m_DetailedDescription;

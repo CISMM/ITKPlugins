@@ -58,14 +58,14 @@ Slicer4PluginGenerator
   if ( !this->GenerateXML() )
     {
     std::cerr << "Failed to generate XML description for plugin '" << m_PluginPath << "/"
-              << m_ClassDescription->GetClassName() << "'.";
+              << m_ClassDescription->GetPluginName() << "'.";
     return false;
     }
 
   if ( !this->GenerateCode() )
     {
-    std::cerr << "Failed to generate code for plugin '" << m_ClassDescription->GetClassName()
-              << "/" << m_ClassDescription->GetClassName() << "'.";
+    std::cerr << "Failed to generate code for plugin '" << m_ClassDescription->GetPluginName()
+              << "/" << m_ClassDescription->GetPluginName() << "'.";
     return false;
     }
 
@@ -88,10 +88,10 @@ Slicer4PluginGenerator
     filePath.append( "/" );
 #endif
     }
-  filePath.append( m_ClassDescription->GetClassName() );
+  filePath.append( m_ClassDescription->GetPluginName() );
   filePath.append( ".xml" );
 
-  std::cout << "Writing Slicer4 plugin XML file for " << m_ClassDescription->GetClassName()
+  std::cout << "Writing Slicer4 plugin XML file for " << m_ClassDescription->GetPluginName()
             << std::endl;
 
   std::ofstream os( filePath.c_str() );
@@ -100,7 +100,7 @@ Slicer4PluginGenerator
   os << "<executable>\n";
 
   os << "  <category>ITK</category>\n";
-  os << "  <title>" << m_ClassDescription->GetClassName() << "</title>\n";
+  os << "  <title>" << m_ClassDescription->GetPluginName() << "</title>\n";
   os << "  <description>\n";
   os << m_ClassDescription->GetBriefDescription();
   os << "  </description>\n";
@@ -151,8 +151,8 @@ Slicer4PluginGenerator
 
   // Class parameters second
   os << "  <parameters>\n";
-  os << "    <label>" << m_ClassDescription->GetClassName() << " Parameters</label>\n";
-  os << "    <description>Parameters for the " << m_ClassDescription->GetClassName()
+  os << "    <label>" << m_ClassDescription->GetPluginName() << " Parameters</label>\n";
+  os << "    <description>Parameters for the " << m_ClassDescription->GetPluginName()
      << " class in ITK.</description>\n";
 
   for (int i = 0; i < m_ClassDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -194,14 +194,14 @@ Slicer4PluginGenerator
     filePath.append( "/" );
 #endif
     }
-  filePath.append( m_ClassDescription->GetClassName() );
+  filePath.append( m_ClassDescription->GetPluginName() );
   filePath.append( ".cxx" );
 
-  std::cout << "Writing Slicer4 plugin CXX file for " << m_ClassDescription->GetClassName()
+  std::cout << "Writing Slicer4 plugin CXX file for " << m_ClassDescription->GetPluginName()
             << std::endl;
 
   // Useful variables
-  std::string filterName( m_ClassDescription->GetClassName() );
+  std::string filterName( m_ClassDescription->GetPluginName() );
   filterName.append( "ImageFilter" );
 
   std::ofstream os( filePath.c_str() );
@@ -212,7 +212,7 @@ Slicer4PluginGenerator
   os << "#include <itkImageFileWriter.h>\n";
   os << "#include <itk" << filterName << ".h>\n\n";
 
-  os << "#include \"" << m_ClassDescription->GetClassName() << "CLP.h\"\n\n";
+  os << "#include \"" << m_ClassDescription->GetPluginName() << "CLP.h\"\n\n";
 
   os << "namespace\n";
   os << "{\n\n";
@@ -234,7 +234,10 @@ Slicer4PluginGenerator
   os << "  typename OutputWriterType::Pointer outputWriter = OutputWriterType::New();\n";
   os << "  outputWriter->SetFileName( outputVolume.c_str() );\n\n";
 
-  os << "  typedef itk::" << filterName << "< InputImageType, InputImageType, InputImageType > FilterType;\n";
+  //os << "  typedef itk::" << filterName << "< InputImageType,
+  //InputImageType, InputImageType > FilterType;\n";
+  os << "  typedef itk::" << m_ClassDescription->GetITKClassName()
+     << "< InputImageType, InputImageType, OutputImageType > FilterType;\n";
   os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
 
   os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
@@ -260,6 +263,7 @@ Slicer4PluginGenerator
 
   os << "} // end namespace\n\n";
 
+#if 0
   os << "int main( int argc, char* argv[] )\n";
   os << "{\n\n";
 
@@ -272,7 +276,9 @@ Slicer4PluginGenerator
 
   os << "  return EXIT_SUCCESS;\n";
   os << "}\n\n";
-
+#else
+  os << "#include \"Slicer4PluginMain.h\"\n";
+#endif
 
   os.flush();
   os.close();

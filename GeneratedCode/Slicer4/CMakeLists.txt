@@ -1,3 +1,5 @@
+include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/Slicer4" )
+
 foreach( PLUGIN_NAME ${Plugin_JSON} )
 
   # Hack to get slicerMacroBuildCLI to stop causing a fatal error when it can't find

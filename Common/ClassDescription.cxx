@@ -40,7 +40,8 @@ void
 ClassDescription
 ::PrintSelf( std::ostream & os )
 {
-  os << "ClassName: " << m_ClassName << std::endl;
+  os << "PluginName: " << m_PluginName << std::endl;
+  os << "ITKClassName: " << m_ITKClassName << std::endl;
   os << "NumberOfInputs: " << m_NumberOfInputs << std::endl;
   os << "BriefDescription: " << m_BriefDescription << std::endl;
   os << "DetailedDescription: " << m_DetailedDescription << std::endl;

@@ -68,8 +68,15 @@ Parser
   JSONNode::json_iterator iter = parent->find( "name" );
   if ( iter != parent->end() )
     {
-    std::string className( (*iter)->as_string().c_str() );
-    description->SetClassName( className );
+    std::string pluginName( (*iter)->as_string().c_str() );
+    description->SetPluginName( pluginName );
+    }
+
+  iter = parent->find( "itk_name" );
+  if ( iter != parent->end() )
+    {
+    std::string itkClassName( (*iter)->as_string().c_str() );
+    description->SetITKClassName( itkClassName );
     }
 
   // Get the number of inputs
