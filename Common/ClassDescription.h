@@ -55,6 +55,20 @@ public:
     return m_PublicDeclarations;
   }
 
+  void SetPixelTypes( const std::string & pixelTypes ) {
+    m_PixelTypes = pixelTypes;
+  }
+  const std::string & GetPixelTypes() const {
+    return m_PixelTypes;
+  }
+
+  void SetOutputPixelType( const std::string & outputType ) {
+    m_OutputPixelType = outputType;
+  }
+  const std::string & GetOutputPixelType() const {
+    return m_OutputPixelType;
+  }
+
   void AddMember( MemberDescription * memberDescription );
   const MemberDescription * GetMemberDescription( int index );
 
@@ -70,6 +84,8 @@ protected:
   std::string m_DetailedDescription;
 
   std::string m_PublicDeclarations;
+  std::string m_PixelTypes;
+  std::string m_OutputPixelType;
 
   std::vector< MemberDescription *> m_Members;
 
