@@ -128,7 +128,7 @@ Slicer4PluginGenerator
   os << "    <label>IO</label>\n";
   os << "    <description>Input/output volumes</description>\n";
 
-  for (int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i)
+  for (int i = 0; i < this->GetNumberOfInputs(); ++i)
     {
     os << "    <image>\n";
     os << "      <name>inputVolume" << i << "</name>\n";
@@ -143,7 +143,7 @@ Slicer4PluginGenerator
   os << "      <name>outputVolume</name>\n";
   os << "      <label>Output Volume</label>\n";
   os << "      <channel>output</channel>\n";
-  os << "      <index>0</index>\n";
+  os << "      <index>" << m_ClassDescription->GetNumberOfInputs() << "</index>\n";
   os << "      <description>Filter output</description>\n";
   os << "    </image>\n";
 
@@ -163,7 +163,6 @@ Slicer4PluginGenerator
       {
       os << "    <double>\n";
       os << "      <name>" << member->GetMemberName() << "</name>\n";
-      //os << "      <longFlag>" << member->GetMemberName() << "</longFlag>\n";
       //os << "      <description>" << member->GetBriefDescription() << "</description>\n";
       os << "      <label>" << member->GetMemberName() << "</label>\n";
       os << "      <default>" << member->GetDefaultValue() << "</default>\n";
@@ -204,6 +203,12 @@ Slicer4PluginGenerator
   std::string filterName( m_ClassDescription->GetPluginName() );
   filterName.append( "ImageFilter" );
 
+  // Override the filter name if it is explicit in the JSON file
+  if ( m_ClassDescription->GetITKClassName() != "" )
+    {
+    filterName = m_ClassDescription->GetITKClassName();
+    }
+
   std::ofstream os( filePath.c_str() );
 
   os << "#include \"itkPluginUtilities.h\"\n\n";
@@ -213,6 +218,8 @@ Slicer4PluginGenerator
   os << "#include <itk" << filterName << ".h>\n\n";
 
   os << "#include \"" << m_ClassDescription->GetPluginName() << "CLP.h\"\n\n";
+
+  this->WritePixelTypeDefinitions( os );
 
   os << "namespace\n";
   os << "{\n\n";
@@ -234,10 +241,12 @@ Slicer4PluginGenerator
   os << "  typename OutputWriterType::Pointer outputWriter = OutputWriterType::New();\n";
   os << "  outputWriter->SetFileName( outputVolume.c_str() );\n\n";
 
-  //os << "  typedef itk::" << filterName << "< InputImageType,
-  //InputImageType, InputImageType > FilterType;\n";
-  os << "  typedef itk::" << m_ClassDescription->GetITKClassName()
-     << "< InputImageType, InputImageType, OutputImageType > FilterType;\n";
+  os << "  typedef itk::" << filterName << "< ";
+  for ( int i = 0; i < this->GetNumberOfInputs(); ++i )
+    {
+    os << "InputImageType, ";
+    }
+  os << " OutputImageType > FilterType;\n";
   os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
 
   os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
@@ -263,22 +272,7 @@ Slicer4PluginGenerator
 
   os << "} // end namespace\n\n";
 
-#if 0
-  os << "int main( int argc, char* argv[] )\n";
-  os << "{\n\n";
-
-  os << "  PARSE_ARGS;\n\n";
-
-  os << "  itk::ImageIOBase::IOPixelType     pixelType;\n";
-  os << "  itk::ImageIOBase::IOComponentType componentType;\n\n";
-
-  os << "  //#include \"RunDispatchLevelOne.h\"\n\n";
-
-  os << "  return EXIT_SUCCESS;\n";
-  os << "}\n\n";
-#else
   os << "#include \"Slicer4PluginMain.h\"\n";
-#endif
 
   os.flush();
   os.close();
@@ -286,3 +280,111 @@ Slicer4PluginGenerator
   return true;
 }
 
+void
+Slicer4PluginGenerator
+::WritePixelTypeDefinitions( std::ostream & os )
+{
+  bool ucharType  = false;
+  bool charType   = false;
+  bool ushortType = false;
+  bool shortType  = false;
+  bool uintType   = false;
+  bool intType    = false;
+  bool ulongType  = false;
+  bool longType   = false;
+  bool floatType  = false;
+  bool doubleType = false;
+
+  std::string pixelTypes = m_ClassDescription->GetPixelTypes();
+  if ( pixelTypes == "BasicPixelIDTypeList" )
+    {
+    ucharType  = true;
+    charType   = true;
+    ushortType = true;
+    shortType  = true;
+    uintType   = true;
+    intType    = true;
+    ulongType  = true;
+    longType   = true;
+    floatType  = true;
+    doubleType = true;
+    }
+  else if ( pixelTypes == "ComplexPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'ComplexPixelIDTypeList'" << std::endl;
+    }
+  else if ( pixelTypes == "IntegerPixelIDTypeList" )
+    {
+    ucharType  = true;
+    charType   = true;
+    ushortType = true;
+    shortType  = true;
+    uintType   = true;
+    intType    = true;
+    ulongType  = true;
+    longType   = true;
+    }
+  else if ( pixelTypes ==  "LabelPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'LabelPixelIDTypeList'" << std::endl;
+    }
+  else if ( pixelTypes == "NonLabelPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'NonLabelPixelIDTypeList'" << std::endl;
+    }
+  else if ( pixelTypes == "RealPixelIDTypeList" )
+    {
+    floatType  = true;
+    doubleType = true;
+    }
+  else if ( pixelTypes == "RealVectorPixelIDTypeList" )
+    {
+
+    }
+  else if ( pixelTypes == "ScalarPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'ScalarPixelIDTypeList'" << std::endl;
+    }
+  else if ( pixelTypes == "VectorPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'VectorPixelIDTypeList'" << std::endl;
+    }
+  else if ( pixelTypes == "typelist" )
+    {
+    std::cerr << "Unsupported pixel type list 'typelist'" << std::endl;
+    }
+  else
+    {
+    std::cerr << "Unrecognized pixel type list '" << pixelTypes << std::endl;
+    }
+
+
+  if ( ucharType )  os << "#define ITK_UCHAR_TYPE\n";
+  if ( charType )   os << "#define ITK_CHAR_TYPE\n";
+  if ( ushortType)  os << "#define ITK_USHORT_TYPE\n";
+  if ( shortType )  os << "#define ITK_SHORT_TYPE\n";
+  if ( uintType )   os << "#define ITK_UINT_TYPE\n";
+  if ( intType )    os << "#define ITK_INT_TYPE\n";
+  if ( ulongType )  os << "#define ITK_ULONG_TYPE\n";
+  if ( longType )   os << "#define ITK_LONG_TYPE\n";
+  if ( floatType )  os << "#define ITK_FLOAT_TYPE\n";
+  if ( doubleType ) os << "#define ITK_DOUBLE_TYPE\n";
+}
+
+
+int
+Slicer4PluginGenerator
+::GetNumberOfInputs()
+{
+  if ( !m_ClassDescription )
+    {
+    return 0;
+    }
+
+  int numberOfInputs = m_ClassDescription->GetNumberOfInputs();
+
+  // We assume filters need at least one input
+  if ( numberOfInputs < 1 ) numberOfInputs++;
+
+  return numberOfInputs;
+}

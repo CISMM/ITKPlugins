@@ -29,6 +29,10 @@ private:
   ClassDescription * m_ClassDescription;
   
   std::string m_PluginPath;
+
+  void WritePixelTypeDefinitions( std::ostream & os );
+
+  int GetNumberOfInputs();
 };
 
 #endif

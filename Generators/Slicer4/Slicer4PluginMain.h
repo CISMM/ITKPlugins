@@ -12,45 +12,66 @@ int main( int argc, char * argv[] )
     // This filter handles all types
     switch( componentType )
       {
+
+#ifdef ITK_UCHAR_TYPE
       case itk::ImageIOBase::UCHAR:
         return Run( argc, argv, static_cast< unsigned char >(0) );
         break;
+#endif
 
+#ifdef ITK_CHAR_TYPE
       case itk::ImageIOBase::CHAR:
         return Run( argc, argv, static_cast< char >(0) );
         break;
+#endif
 
+#ifdef ITK_USHORT_TYPE
       case itk::ImageIOBase::USHORT:
         return Run( argc, argv, static_cast< unsigned short >(0) );
         break;
+#endif
 
+#ifdef ITK_SHORT_TYPE
       case itk::ImageIOBase::SHORT:
         return Run( argc, argv, static_cast< short >(0) );
         break;
+#endif
 
+#ifdef ITK_UINT_TYPE
       case itk::ImageIOBase::UINT:
         return Run( argc, argv, static_cast< unsigned int >(0) );
         break;
+#endif
 
+#ifdef ITK_INT_TYPE
       case itk::ImageIOBase::INT:
         return Run( argc, argv, static_cast< int >(0) );
         break;
+#endif
 
+#ifdef ITK_ULONG_TYPE
       case itk::ImageIOBase::ULONG:
         return Run( argc, argv, static_cast< unsigned long >(0) );
         break;
+#endif
 
+#ifdef ITK_LONG_TYPE
       case itk::ImageIOBase::LONG:
         return Run( argc, argv, static_cast< long >(0) );
         break;
+#endif
 
+#ifdef ITK_FLOAT_TYPE
       case itk::ImageIOBase::FLOAT:
         return Run( argc, argv, static_cast< float >(0) );
         break;
+#endif
 
+#ifdef ITK_DOUBLE_TYPE
       case itk::ImageIOBase::DOUBLE:
         return Run( argc, argv, static_cast< double >(0) );
         break;
+#endif
 
       case itk::ImageIOBase::UNKNOWNCOMPONENTTYPE:
       default:
