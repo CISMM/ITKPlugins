@@ -110,6 +110,22 @@ Parser
     description->SetPublicDeclarations( publicDeclarations );
     }
 
+  // Input pixel types
+  iter = parent->find( "pixel_types" );
+  if ( iter != parent->end() )
+    {
+    std::string pixelTypes( (*iter)->as_string().c_str() );
+    description->SetPixelTypes( pixelTypes );
+    }
+
+  // Output pixel type
+  iter = parent->find( "output_pixel_type" );
+  if ( iter != parent->end() )
+    {
+    std::string outputPixelType( (*iter)->as_string().c_str() );
+    description->SetOutputPixelType( outputPixelType );
+    }
+
   // Parse the members of the class
   JSONNode::json_iterator members = parent->find( "members" );
   if ( (*members)->type() != JSON_ARRAY )

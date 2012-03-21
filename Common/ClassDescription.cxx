@@ -3,15 +3,14 @@
 #include "MemberDescription.h"
 
 ClassDescription
-::ClassDescription()
+::ClassDescription() :
+  m_NumberOfInputs( 0 )
 {
-
 }
 
 ClassDescription
 ::~ClassDescription()
 {
-
 }
 
 void
