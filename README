@@ -25,5 +25,5 @@ UNC Chapel Hill
 Acknowledgements
 ----------------
 
-A number of the JSON description files were copied from the SimpleITK
-project.
+The ITK Plugins project uses the JSON description files in the
+SimpleITK project.
