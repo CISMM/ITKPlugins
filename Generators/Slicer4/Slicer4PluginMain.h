@@ -63,14 +63,36 @@ int main( int argc, char * argv[] )
 
 #ifdef ITK_FLOAT_TYPE
       case itk::ImageIOBase::FLOAT:
+      {
+
+#ifdef ITK_COMPLEX_FLOAT_TYPE
+      if ( pixelType == itk::ImageIOBase::COMPLEX )
+        return Run( argc, argv, static_cast< std::complex< float > >(0) );
+      else
+#endif
+
         return Run( argc, argv, static_cast< float >(0) );
+      }
         break;
 #endif
 
 #ifdef ITK_DOUBLE_TYPE
       case itk::ImageIOBase::DOUBLE:
+      {
+
+#ifdef ITK_COMPLEX_DOUBLE_TYPE
+      if ( pixelType == itk::ImageIOBase::COMPLEX )
+        return Run( argc, argv, static_cast< std::complex< double > >(0) );
+      else
+#endif
+
         return Run( argc, argv, static_cast< double >(0) );
+      }
         break;
+#endif
+
+#ifdef ITK_COMPLEX_FLOAT_TYPE
+        //case itk::ImageIOBase::
 #endif
 
       case itk::ImageIOBase::UNKNOWNCOMPONENTTYPE:
