@@ -170,6 +170,20 @@ Parser
       memberDescription->SetDefaultValue( defaultValue );
       }
 
+    iter = memberNode->find( "itk_type" );
+    if ( iter != memberNode->end() )
+      {
+      std::string itkType( (*iter)->as_string().c_str() );
+      memberDescription->SetITKType( itkType );
+      }
+
+    iter = memberNode->find( "custom_itk_cast" );
+    if ( iter != memberNode->end() )
+      {
+      std::string customITKCast( (*iter)->as_string().c_str() );
+      memberDescription->SetCustomITKCast( customITKCast );
+      }
+
     memberIter++;
     }
 

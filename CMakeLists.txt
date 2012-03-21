@@ -29,100 +29,116 @@ add_subdirectory( Utilities )
 
 set( Plugin_JSON
   # These compile
-  #Abs
-  #AbsoluteValueDifference
-  #Acos
-  #Add
-  #AddConstantTo
-  #And
-  #ApproximateSignedDistanceMap
-  #Asin
-  #Atan
-  #Atan2
-  #Bilateral
-  #BinaryContour
-  #BinaryMagnitude
-  #BinaryMinMaxCurvatureFlow
-  #BinaryProjection
-  #BinaryThinning
-  #BinaryThreshold
-  #BinomialBlur
-  #BoundedReciprocal
-  #ComplexToImaginary
-  #ComplexToModulus
-  #ComplexToPhase
-  #ComplexToReal
-  #ConnectedComponent
-  #ConnectedThreshold
-  #Cos
-  #CurvatureAnisotropicDiffusion
-  #CurvatureFlow
-  #DanielssonDistanceMap
-  #Derivative
-  #DiscreteGaussian
-  #Divide
-  #DoubleThreshold
-  #Exp
-  #ExpNegative
-  #FFTShift
-  #GradientAnisotropicDiffusion
-  #GradientMagnitudeRecursiveGaussian
-  #HConcave
-  #HConvex
-  #HMaxima
-  #HMinima
-  #HuangThreshold
-  #IntensityWindowing
-  #IntermodesThreshold
-  #InvertIntensity
-  #IsoContourDistance
-  #IsoDataThreshold
-  #KittlerIllingworthThreshold
-  #LabelContour
-  #Laplacian
-  #LaplacianRecursiveGaussian
-  #LaplacianSharpening
-  #LiThreshold
-  #Log
-  #Log10
-  #MaskNegated
-  #Maximum
-  #MaximumEntropyThreshold
-  #MaximumProjection
-  #MeanProjection
-  #MedianProjection
-  #MinMaxCurvatureFlow
-  #Minimum
-  #MinimumProjection
-  #Modulus
-  #MomentsThreshold
-  #Normalize
-  #NormalizeToConstant
-  #Not
-  #Or
-  #OtsuThreshold
-  #Pow
-  #PowToConstant
-  #RenyiEntropyThreshold
-  #RescaleIntensity
-  #ShanbhagThreshold
-  #ShiftScale
-  #Sigmoid
-  #SignedDanielssonDistanceMap
-  #SignedMaurerDistanceMap
-  #Sin
-  #SobelEdgeDetection
-  #Sqrt
-  #Square
-  #SquaredDifference
-  #StandardDeviationProjection
-  #SubtractConstantBy
-  #SumProjection
-  #Tan
-  #TriangleThreshold
-  #Xor
-  #YenThreshold
-  #ZeroCrossingBasedEdgeDetection
+  Abs
+  AbsoluteValueDifference
+  Acos
+  Add
+  AddConstantTo
+  And
+  ApproximateSignedDistanceMap
+  Asin
+  Atan
+  Atan2
+  Bilateral
+  BinaryContour
+  BinaryMagnitude
+  BinaryMinMaxCurvatureFlow
+  BinaryProjection
+  BinaryThinning
+  BinaryThreshold
+  BinomialBlur
+  BoundedReciprocal
+  CannyEdgeDetection
+  ComplexToImaginary
+  ComplexToModulus
+  ComplexToPhase
+  ComplexToReal
+  ConnectedComponent
+  ConnectedThreshold
+  ConstantPad
+  Cos
+  Crop
+  CurvatureAnisotropicDiffusion
+  CurvatureFlow
+  DanielssonDistanceMap
+  Derivative
+  DiscreteGaussian
+  Divide
+  DoubleThreshold
+  Exp
+  ExpNegative
+  FFTShift
+  GradientAnisotropicDiffusion
+  GradientMagnitudeRecursiveGaussian
+  HConcave
+  HConvex
+  HMaxima
+  HMinima
+  HuangThreshold
+  IntensityWindowing
+  IntermodesThreshold
+  InvertIntensity
+  IsoContourDistance
+  IsoDataThreshold
+  IsolatedWatershed
+  KittlerIllingworthThreshold
+  LabelContour
+  Laplacian
+  LaplacianRecursiveGaussian
+  LaplacianSharpening
+  LiThreshold
+  Log
+  Log10
+  Mask
+  MaskNegated
+  Maximum
+  MaximumEntropyThreshold
+  MaximumProjection
+  Mean
+  MeanProjection
+  MedianProjection
+  Median
+  MinMaxCurvatureFlow
+  Minimum
+  MinimumProjection
+  MirrorPad
+  Modulus
+  MomentsThreshold
+  Multiply
+  MultiplyByConstant
+  NeighborhoodConnected
+  Noise
+  Normalize
+  NormalizeToConstant
+  Not
+  Or
+  OtsuThreshold
+  Pow
+  PowToConstant
+  RenyiEntropyThreshold
+  RescaleIntensity
+  ShanbhagThreshold
+  ShiftScale
+  Shrink
+  Sigmoid
+  SignedDanielssonDistanceMap
+  SignedMaurerDistanceMap
+  SimpleContourExtractor
+  Sin
+  SobelEdgeDetection
+  Sqrt
+  Square
+  SquaredDifference
+  StandardDeviationProjection
+  Subtract
+  SubtractConstantBy
+  SumProjection
+  Tan
+  TriangleThreshold
+  WrapPad
+  Xor
+  YenThreshold
+  ZeroCrossingBasedEdgeDetection
 
   # These don't compile
   #-BinaryClosingByReconstruction
@@ -137,12 +153,9 @@ set( Plugin_JSON
   #-BlackTopHat
   #-BoxMean
   #-BoxSigma
-  #-CannyEdgeDetection
   #-CheckerBoard
   #-ClosingByReconstruction
-  #-ConstantPad
   #-Convolution
-  #-Crop
   #-DilateObjectMorphology
   #-DivideByConstant
   #-DivideConstantBy
@@ -165,7 +178,6 @@ set( Plugin_JSON
   #-HausdorffDistance
   #-HistogramMatching
   #-InverseFFT
-  #-IsolatedWatershed
   #-LabelMapMask
   #-LabelMapOverlay
   #-LabelMapToBinary
@@ -174,16 +186,8 @@ set( Plugin_JSON
   #-LabelOverlay
   #-LabelToRGB
   #-MagnitudeAndPhaseToComplex
-  #-Mask
-  #-Mean
-  #-Median
-  #-MirrorPad
   #-MorphologicalGradient
-  #-Multiply
-  #-MultiplyByConstant
   #-N4BiasFieldCorrection
-  #-NeighborhoodConnected
-  #-Noise
   #-OpeningByReconstruction
   #-Paste
   #-PermuteAxes
@@ -195,10 +199,7 @@ set( Plugin_JSON
   #-ScalarConnectedComponent
   #-ScalarToRGBColormap
   #-ShapeDetectionLevelSet
-  #-Shrink
-  #-SimpleContourExtractor
   #-SmoothingRecursiveGaussian
-  #-Subtract
   #-Threshold
   #-ThresholdMaximumConnectedComponents
   #-VectorConnectedComponent
@@ -208,7 +209,6 @@ set( Plugin_JSON
   #-VotingBinaryHoleFilling
   #-VotingBinaryIterativeHoleFilling
   #-WhiteTopHat
-  #-WrapPad
   #-ZeroCrossing
 )
 

@@ -2,6 +2,7 @@
 
 #include <fstream>
 #include <iostream>
+#include <string>
 
 #include "ClassDescription.h"
 #include "MemberDescription.h"
@@ -107,7 +108,7 @@ Slicer4PluginGenerator
   os << "  <version>1.0</version>\n";
   os << "  <documentation-url></documentation-url>\n";
   os << "  <license></license>\n";
-  os << "  <contributor>ITK Plugins Project</contributor>\n\n";
+  os << "  <contributor>ITK Plugins Project</contributor>\n";
 
   this->WriteXMLParameters( os );
 
@@ -123,33 +124,7 @@ void
 Slicer4PluginGenerator
 ::WriteXMLParameters( std::ostream & os )
 {
-  // IO parameters first
-  os << "  <parameters>\n";
-  os << "    <label>IO</label>\n";
-  os << "    <description>Input/output volumes</description>\n";
-
-  for (int i = 0; i < this->GetNumberOfInputs(); ++i)
-    {
-    os << "    <image>\n";
-    os << "      <name>inputVolume" << i << "</name>\n";
-    os << "      <label>Input Volume " << i << "</label>\n";
-    os << "      <channel>input</channel>\n";
-    os << "      <index>" << i << "</index>\n";
-    os << "      <description></description>\n";
-    os << "    </image>\n";
-    }
-
-  os << "    <image>\n";
-  os << "      <name>outputVolume</name>\n";
-  os << "      <label>Output Volume</label>\n";
-  os << "      <channel>output</channel>\n";
-  os << "      <index>" << m_ClassDescription->GetNumberOfInputs() << "</index>\n";
-  os << "      <description>Filter output</description>\n";
-  os << "    </image>\n";
-
-  os << "  </parameters>\n\n";
-
-  // Class parameters second
+  // Class parameters first
   os << "  <parameters>\n";
   os << "    <label>" << m_ClassDescription->GetPluginName() << " Parameters</label>\n";
   os << "    <description>Parameters for the " << m_ClassDescription->GetPluginName()
@@ -179,6 +154,16 @@ Slicer4PluginGenerator
       {
       xmlTypeName = "double";
       }
+    else if ( typeName == "std::vector<int>" ||
+              typeName == "std::vector<unsigned int>" ||
+              typeName == "std::vector<uint32_t>" )
+      {
+      xmlTypeName = "integer-vector";
+      }
+    else if ( typeName == "std::vector<double>" )
+      {
+      xmlTypeName = "double-vector";
+      }
     else
       {
       std::cerr << "Unknown type name '" << typeName << "'." << std::endl;
@@ -188,16 +173,68 @@ Slicer4PluginGenerator
     if ( typeKnown )
       {
       os << "    <" << xmlTypeName << ">\n";
-      os << "      <name>" << member->GetMemberName() << "</name>\n";
+      os << "      <name>plugins" << member->GetMemberName() << "</name>\n";
+      os << "      <longflag>--" << member->GetMemberName() << "</longflag>\n";
       //os << "      <description>" << member->GetBriefDescription() << "</description>\n";
       os << "      <label>" << member->GetMemberName() << "</label>\n";
-      os << "      <default>" << member->GetDefaultValue() << "</default>\n";
+      os << "      <default>";
+
+      std::string defaultValue = member->GetDefaultValue();
+      if ( defaultValue.find( "std::vector" ) != std::string::npos )
+        {
+        size_t pos1 = defaultValue.find( "(" ) + 1;
+        size_t pos2 = defaultValue.find( "," );
+        std::string vectorLengthString = defaultValue.substr( pos1, pos2-pos1 );
+        int vectorLength = atoi( vectorLengthString.c_str() );
+
+        pos1 = defaultValue.find_first_not_of( ' ', pos2+1 );
+        pos2 = defaultValue.find( ")" );
+        std::string defaultElementString = defaultValue.substr( pos1, pos2-pos1 );
+
+        for ( int i = 0; i < vectorLength-1; ++i )
+          {
+          os << defaultElementString << ",";
+          }
+        os << defaultElementString;
+        }
+      else
+        {
+        os << defaultValue;
+        }
+      os << "</default>\n";
+
       os << "    </" << xmlTypeName << ">\n";
       }
 
     }
 
-  os << "  </parameters>\n\n";
+  os << "  </parameters>\n";
+
+  // IO parameters second
+  os << "  <parameters>\n";
+  os << "    <label>IO</label>\n";
+  os << "    <description>Input/output volumes</description>\n";
+
+  for (int i = 0; i < this->GetNumberOfInputs(); ++i)
+    {
+    os << "    <image>\n";
+    os << "      <name>inputVolume" << i << "</name>\n";
+    os << "      <label>Input Volume " << i << "</label>\n";
+    os << "      <channel>input</channel>\n";
+    os << "      <index>" << i << "</index>\n";
+    os << "      <description></description>\n";
+    os << "    </image>\n";
+    }
+
+  os << "    <image>\n";
+  os << "      <name>outputVolume</name>\n";
+  os << "      <label>Output Volume</label>\n";
+  os << "      <channel>output</channel>\n";
+  os << "      <index>" << m_ClassDescription->GetNumberOfInputs() << "</index>\n";
+  os << "      <description>Filter output</description>\n";
+  os << "    </image>\n";
+
+  os << "  </parameters>\n";
 }
 
 bool
@@ -247,6 +284,8 @@ Slicer4PluginGenerator
     return false;
     }
 
+  os << "\n\n";
+
   os << "namespace\n";
   os << "{\n\n";
 
@@ -283,11 +322,33 @@ Slicer4PluginGenerator
   for (int i = 0; i < m_ClassDescription->GetNumberOfMemberDescriptions(); ++i)
     {
     const MemberDescription * member = m_ClassDescription->GetMemberDescription( i );
-    os << "  filter->Set" << member->GetMemberName() << "( " << member->GetMemberName()
-       << ");\n";
-    }
 
-  os << "\n";
+    if ( member->GetTypeName().find( "vector" ) != std::string::npos )
+      {
+      os << "  " << member->GetITKType() << " tmp" << member->GetMemberName() << ";\n";
+
+      if ( member->GetCustomITKCast() != "<undefined>" )
+        {
+        os << member->GetCustomITKCast() << "\n";
+        }
+      else
+        {
+        for ( int i = 0; i < 3; ++i )
+          {
+          os << "  tmp" << member->GetMemberName() << "[" << i << "] = plugins" << member->GetMemberName() << "[" << i << "];\n";
+          }
+        os << "  filter->Set" << member->GetMemberName() << "( tmp" << member->GetMemberName()
+           << " );\n";
+        }
+      }
+    else
+      {
+      os << "  filter->Set" << member->GetMemberName() << "( plugins" << member->GetMemberName()
+         << " );\n";
+      }
+
+    os << "\n";
+    }
 
   os << "  outputWriter->SetInput( filter->GetOutput() );\n";
   os << "  outputWriter->SetUseCompression( 1 );\n";

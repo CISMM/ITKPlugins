@@ -30,6 +30,20 @@ public:
     return m_DefaultValue;
   }
 
+  void SetITKType( const std::string & itkType ) {
+    m_ITKType = itkType;
+  }
+  const std::string & GetITKType() const {
+    return m_ITKType;
+  }
+
+  void SetCustomITKCast( const std::string & customITKCast ) {
+    m_CustomITKCast = customITKCast;
+  }
+  const std::string & GetCustomITKCast() const {
+    return m_CustomITKCast;
+  }
+
   void PrintSelf( std::ostream & os );
 
 protected:
@@ -38,6 +52,8 @@ private:
   std::string m_MemberName;
   std::string m_TypeName;
   std::string m_DefaultValue;
+  std::string m_ITKType;
+  std::string m_CustomITKCast;
 };
 
 #endif

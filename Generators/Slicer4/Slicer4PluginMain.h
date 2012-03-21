@@ -91,10 +91,6 @@ int main( int argc, char * argv[] )
         break;
 #endif
 
-#ifdef ITK_COMPLEX_FLOAT_TYPE
-        //case itk::ImageIOBase::
-#endif
-
       case itk::ImageIOBase::UNKNOWNCOMPONENTTYPE:
       default:
         std::cout << "unknown component type" << std::endl;
