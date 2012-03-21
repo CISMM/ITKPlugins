@@ -33,11 +33,21 @@ int main( int argc, char* argv[] )
 
   if ( strncmp( "--xml", argv[3], 6 ) == 0 )
     {
-    slicer4Generator->GenerateXML();
+    bool success = slicer4Generator->GenerateXML();
+    if ( !success )
+      {
+      std::cerr << "Error generating XML" << std::endl;
+      return EXIT_FAILURE;
+      }
     }
   else if ( strncmp( "--cxx", argv[3], 6 ) == 0 )
     {
-    slicer4Generator->GenerateCode();
+    bool success = slicer4Generator->GenerateCode();
+    if ( !success )
+      {
+      std::cerr << "Error generating CXX" << std::endl;
+      return EXIT_FAILURE;
+      }
     }
 
   delete slicer4Generator;

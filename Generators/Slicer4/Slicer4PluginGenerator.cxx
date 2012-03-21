@@ -159,19 +159,42 @@ Slicer4PluginGenerator
     {
     const MemberDescription * member = m_ClassDescription->GetMemberDescription( i );
     std::string typeName = member->GetTypeName();
-    if ( typeName == std::string( "double" ) )
+    std::string xmlTypeName;
+    bool typeKnown = true;
+
+    if ( typeName == "bool" )
       {
-      os << "    <double>\n";
-      os << "      <name>" << member->GetMemberName() << "</name>\n";
-      //os << "      <description>" << member->GetBriefDescription() << "</description>\n";
-      os << "      <label>" << member->GetMemberName() << "</label>\n";
-      os << "      <default>" << member->GetDefaultValue() << "</default>\n";
-      os << "    </double>\n";
+      xmlTypeName = "boolean";
+      }
+    else if ( typeName == "unsigned int" || typeName == "int" ||
+              typeName == "uint8_t" || typeName == "uint32_t" )
+      {
+      xmlTypeName = "integer";
+      }
+    else if ( typeName == "float" )
+      {
+      xmlTypeName = "float";
+      }
+    else if ( typeName == "double" )
+      {
+      xmlTypeName = "double";
       }
     else
       {
       std::cerr << "Unknown type name '" << typeName << "'." << std::endl;
+      typeKnown = false;
       }
+
+    if ( typeKnown )
+      {
+      os << "    <" << xmlTypeName << ">\n";
+      os << "      <name>" << member->GetMemberName() << "</name>\n";
+      //os << "      <description>" << member->GetBriefDescription() << "</description>\n";
+      os << "      <label>" << member->GetMemberName() << "</label>\n";
+      os << "      <default>" << member->GetDefaultValue() << "</default>\n";
+      os << "    </" << xmlTypeName << ">\n";
+      }
+
     }
 
   os << "  </parameters>\n\n";
@@ -219,7 +242,10 @@ Slicer4PluginGenerator
 
   os << "#include \"" << m_ClassDescription->GetPluginName() << "CLP.h\"\n\n";
 
-  this->WritePixelTypeDefinitions( os );
+  if ( !this->WritePixelTypeDefinitions( os ) )
+    {
+    return false;
+    }
 
   os << "namespace\n";
   os << "{\n\n";
@@ -280,7 +306,7 @@ Slicer4PluginGenerator
   return true;
 }
 
-void
+bool
 Slicer4PluginGenerator
 ::WritePixelTypeDefinitions( std::ostream & os )
 {
@@ -294,43 +320,52 @@ Slicer4PluginGenerator
   bool longType   = false;
   bool floatType  = false;
   bool doubleType = false;
+  bool complexFloatType  = false;
+  bool complexDoubleType = false;
 
   std::string pixelTypes = m_ClassDescription->GetPixelTypes();
-  if ( pixelTypes == "BasicPixelIDTypeList" )
+  if ( pixelTypes == "BasicPixelIDTypeList" ||
+       pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
+       pixelTypes == "NonLabelPixelIDTypeList" )
     {
-    ucharType  = true;
-    charType   = true;
-    ushortType = true;
-    shortType  = true;
-    uintType   = true;
-    intType    = true;
-    ulongType  = true;
-    longType   = true;
-    floatType  = true;
+    //ucharType  = true;
+    //charType   = true;
+    //ushortType = true;
+    //shortType  = true;
+    //uintType   = true;
+    //intType    = true;
+    //ulongType  = true;
+    //longType   = true;
+    //floatType  = true;
     doubleType = true;
     }
-  else if ( pixelTypes == "ComplexPixelIDTypeList" )
+  else if ( pixelTypes == "ComplexPixelIDTypeList" ||
+            pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
+            pixelTypes == "NonLabelPixelIDTypeList" )
     {
-    std::cerr << "Unsupported pixel type list 'ComplexPixelIDTypeList'" << std::endl;
+    complexFloatType  = true;
+    complexDoubleType = true;
     }
   else if ( pixelTypes == "IntegerPixelIDTypeList" )
     {
-    ucharType  = true;
-    charType   = true;
-    ushortType = true;
-    shortType  = true;
-    uintType   = true;
+    //ucharType  = true;
+    //charType   = true;
+    //ushortType = true;
+    //shortType  = true;
+    //uintType   = true;
     intType    = true;
-    ulongType  = true;
-    longType   = true;
+    //ulongType  = true;
+    //longType   = true;
     }
   else if ( pixelTypes ==  "LabelPixelIDTypeList" )
     {
     std::cerr << "Unsupported pixel type list 'LabelPixelIDTypeList'" << std::endl;
+    return false;
     }
   else if ( pixelTypes == "NonLabelPixelIDTypeList" )
     {
     std::cerr << "Unsupported pixel type list 'NonLabelPixelIDTypeList'" << std::endl;
+    return false;
     }
   else if ( pixelTypes == "RealPixelIDTypeList" )
     {
@@ -339,25 +374,29 @@ Slicer4PluginGenerator
     }
   else if ( pixelTypes == "RealVectorPixelIDTypeList" )
     {
-
+    std::cerr << "Unsupported pixel type list 'RealVectorPixelIDTypeList'" << std::endl;
+    return false;
     }
   else if ( pixelTypes == "ScalarPixelIDTypeList" )
     {
     std::cerr << "Unsupported pixel type list 'ScalarPixelIDTypeList'" << std::endl;
+    return false;
     }
   else if ( pixelTypes == "VectorPixelIDTypeList" )
     {
     std::cerr << "Unsupported pixel type list 'VectorPixelIDTypeList'" << std::endl;
+    return false;
     }
   else if ( pixelTypes == "typelist" )
     {
     std::cerr << "Unsupported pixel type list 'typelist'" << std::endl;
+    return false;
     }
   else
     {
     std::cerr << "Unrecognized pixel type list '" << pixelTypes << std::endl;
+    return false;
     }
-
 
   if ( ucharType )  os << "#define ITK_UCHAR_TYPE\n";
   if ( charType )   os << "#define ITK_CHAR_TYPE\n";
@@ -369,6 +408,10 @@ Slicer4PluginGenerator
   if ( longType )   os << "#define ITK_LONG_TYPE\n";
   if ( floatType )  os << "#define ITK_FLOAT_TYPE\n";
   if ( doubleType ) os << "#define ITK_DOUBLE_TYPE\n";
+  if ( complexFloatType )  os << "#define ITK_COMPLEX_FLOAT_TYPE\n";
+  if ( complexDoubleType ) os << "#define ITK_COMPLEX_DOUBLE_TYPE\n";
+
+  return true;
 }
 
 

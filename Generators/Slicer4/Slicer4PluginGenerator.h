@@ -30,7 +30,7 @@ private:
   
   std::string m_PluginPath;
 
-  void WritePixelTypeDefinitions( std::ostream & os );
+  bool WritePixelTypeDefinitions( std::ostream & os );
 
   int GetNumberOfInputs();
 };
