@@ -21,11 +21,25 @@ public:
     return m_PluginName;
   }
 
+  void SetTemplateCodeFileName( const std::string & filename ) {
+    m_TemplateCodeFileName = filename;
+  }
+  const std::string & GetTemplateCodeFileName() const {
+    return m_TemplateCodeFileName;
+  }
+
   void SetITKClassName( const std::string & name ) {
     m_ITKClassName = name;
   }
   const std::string & GetITKClassName() const {
     return m_ITKClassName;
+  }
+
+  void SetFilterType( const std::string & filterType ) {
+    m_FilterType = filterType;
+  }
+  const std::string & GetFilterType() const {
+    return m_FilterType;
   }
 
   void SetNumberOfInputs( int numInputs ) {
@@ -94,7 +108,9 @@ public:
 
 protected:
   std::string m_PluginName;
+  std::string m_TemplateCodeFileName;
   std::string m_ITKClassName;
+  std::string m_FilterType;
   int         m_NumberOfInputs;
   std::string m_BriefDescription;
   std::string m_DetailedDescription;
