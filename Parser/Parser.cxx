@@ -73,11 +73,25 @@ Parser
     description->SetPluginName( pluginName );
     }
 
+  iter = parent->find( "template_code_filename" );
+  if ( iter != parent->end() )
+    {
+    std::string templateCodeFileName( (*iter)->as_string().c_str() );
+    description->SetTemplateCodeFileName( templateCodeFileName );
+    }
+
   iter = parent->find( "itk_name" );
   if ( iter != parent->end() )
     {
     std::string itkClassName( (*iter)->as_string().c_str() );
     description->SetITKClassName( itkClassName );
+    }
+
+  iter = parent->find( "filter_type" );
+  if ( iter != parent->end() )
+    {
+    std::string filterType( (*iter)->as_string().c_str() );
+    description->SetFilterType( filterType );
     }
 
   // Get the number of inputs
