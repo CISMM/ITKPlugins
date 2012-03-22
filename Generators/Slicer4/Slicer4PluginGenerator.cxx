@@ -143,7 +143,7 @@ Slicer4PluginGenerator
       xmlTypeName = "boolean";
       }
     else if ( typeName == "unsigned int" || typeName == "int" ||
-              typeName == "uint8_t" || typeName == "uint32_t" )
+              typeName == "uint8_t" || typeName == "uint32_t" || typeName == "uint64_t" )
       {
       xmlTypeName = "integer";
       }
@@ -157,7 +157,8 @@ Slicer4PluginGenerator
       }
     else if ( typeName == "std::vector<int>" ||
               typeName == "std::vector<unsigned int>" ||
-              typeName == "std::vector<uint32_t>" )
+              typeName == "std::vector<uint32_t>" ||
+              typeName == "std::vector<bool>" )
       {
       xmlTypeName = "integer-vector";
       }
@@ -326,14 +327,28 @@ Slicer4PluginGenerator
   os << "  PARSE_ARGS;\n\n";
 
   os << "  typedef itk::Image< TInput, 3 > InputImageType;\n";
-  os << "  typedef itk::Image< TInput, 3 > OutputImageType;\n\n";
+  for ( int i = 1; i < m_ClassDescription->GetNumberOfInputs(); ++i )
+    {
+    os << "  typedef itk::Image< TInput, 3 > InputImageType" << i+1 << ";\n";
+    }
+
+  if ( m_ClassDescription->GetOutputPixelType() != "" )
+    {
+    // Custom pixel type
+    os << "  typedef itk::Image< " << m_ClassDescription->GetOutputPixelType() << ", 3 > OutputImageType;\n";
+    }
+  else
+    {
+    // Standard pixel type
+    os << "  typedef itk::Image< TInput, 3 > OutputImageType;\n\n";
+    }
 
   for ( int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i )
     {
     os << "  typedef itk::ImageFileReader< InputImageType  > InputReaderType" << i << ";\n";
     os << "  typename InputReaderType" << i << "::Pointer inputReader" << i
        << " = InputReaderType" << i << "::New();\n";
-    os << "  inputReader" << i << "->SetFileName( inputVolume" << i << ".c_str() );\n\n";
+    os << "  inputReader" << i << "->SetFileName( inputVolume" << i << ".c_str() );\n";
     os << "  inputReader" << i << "->Update();\n";
     os << "  typename InputImageType::Pointer image" << i+1 << " = inputReader" << i << "->GetOutput();\n\n";
     }
@@ -342,14 +357,28 @@ Slicer4PluginGenerator
   os << "  typename OutputWriterType::Pointer outputWriter = OutputWriterType::New();\n";
   os << "  outputWriter->SetFileName( outputVolume.c_str() );\n\n";
 
-  os << "  typedef itk::" << filterName << "< ";
-  for ( int i = 0; i < this->GetNumberOfInputs(); ++i )
+  if ( m_ClassDescription->GetFilterType() != "" )
     {
-    os << "InputImageType, ";
+    // Custom filter type declaration from JSON file
+    os << "  typedef " << m_ClassDescription->GetFilterType() << " FilterType;\n";
     }
-  os << " OutputImageType > FilterType;\n";
-  os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
+  else if ( m_ClassDescription->GetTemplateCodeFileName() == "KernelImageFilter" )
+    {
+    // Kernel filtering class of filters
+    os << "  typedef itk::" << filterName << "< InputImageType, InputImageType, InputImageType > FilterType;\n";
+    }
+  else
+    {
+    // Standard filter type declaration
+    os << "  typedef itk::" << filterName << "< ";
+    for ( int i = 0; i < this->GetNumberOfInputs(); ++i )
+      {
+      os << "InputImageType, ";
+      }
+    os << " OutputImageType > FilterType;\n";
+    }
 
+  os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
   os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
 
   if ( m_ClassDescription->GetCustomSetInput() == "<undefined>" )
@@ -408,9 +437,9 @@ Slicer4PluginGenerator
            << " );\n";
         }
       }
-
-    os << "\n";
     }
+
+  os << "\n";
 
   os << "  outputWriter->SetInput( filter->GetOutput() );\n";
   os << "  outputWriter->SetUseCompression( 1 );\n";
