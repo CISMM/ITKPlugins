@@ -70,6 +70,13 @@ public:
     return m_OutputPixelType;
   }
 
+  void SetCustomSetInput( const std::string & setInput ) {
+    m_CustomSetInput = setInput;
+  }
+  const std::string & GetCustomSetInput() const {
+    return m_CustomSetInput;
+  }
+
   void AddMember( MemberDescription * memberDescription );
   const MemberDescription * GetMemberDescription( int index ) const;
 
@@ -77,8 +84,11 @@ public:
 
   void AddEnumeration( Enumeration * enumeration );
   const Enumeration * GetEnumeration( int index ) const;
+  const Enumeration * GetEnumeration( const std::string & name ) const;
 
   int GetNumberOfEnumerations() const;
+
+  bool IsEnumerationType( const std::string & name );
 
   void PrintSelf( std::ostream & os );
 
@@ -92,6 +102,8 @@ protected:
   std::string m_PublicDeclarations;
   std::string m_PixelTypes;
   std::string m_OutputPixelType;
+
+  std::string m_CustomSetInput;
 
   std::vector< Enumeration * >      m_Enumerations;
   std::vector< MemberDescription *> m_Members;

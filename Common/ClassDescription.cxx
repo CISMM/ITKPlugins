@@ -5,7 +5,8 @@
 
 ClassDescription
 ::ClassDescription() :
-  m_NumberOfInputs( 0 )
+  m_NumberOfInputs( 0 ),
+  m_CustomSetInput( "<undefined>" )
 {
 }
 
@@ -59,11 +60,41 @@ ClassDescription
   return m_Enumerations[index];
 }
 
+const Enumeration *
+ClassDescription
+::GetEnumeration( const std::string & name ) const
+{
+  for ( int i = 0; i < this->GetNumberOfEnumerations(); ++i )
+    {
+    if ( m_Enumerations[i]->GetName() == name )
+      {
+      return m_Enumerations[i];
+      }
+    }
+
+  return NULL;
+}
+
 int
 ClassDescription
 ::GetNumberOfEnumerations() const
 {
   return static_cast< int >( m_Enumerations.size() );
+}
+
+bool
+ClassDescription
+::IsEnumerationType( const std::string & name )
+{
+  for ( int i = 0; i < this->GetNumberOfEnumerations(); ++i )
+    {
+    if ( this->GetEnumeration( i )->GetName() == name )
+      {
+      return true;
+      }
+    }
+
+  return false;
 }
 
 void

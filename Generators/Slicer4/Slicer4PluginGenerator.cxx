@@ -5,6 +5,7 @@
 #include <string>
 
 #include "ClassDescription.h"
+#include "Enumeration.h"
 #include "MemberDescription.h"
 
 Slicer4PluginGenerator
@@ -164,6 +165,10 @@ Slicer4PluginGenerator
       {
       xmlTypeName = "double-vector";
       }
+    else if ( m_ClassDescription->IsEnumerationType( typeName ) )
+      {
+      xmlTypeName = "integer-enumeration";
+      }
     else
       {
       std::cerr << "Unknown type name '" << typeName << "'." << std::endl;
@@ -197,11 +202,34 @@ Slicer4PluginGenerator
           }
         os << defaultElementString;
         }
+      else if ( xmlTypeName == "integer-enumeration" )
+        {
+        // TODO - replace with value of enum corresponding to
+        // enumerant name
+        os << 0;
+        }
       else
         {
         os << defaultValue;
         }
       os << "</default>\n";
+
+      // Write enumeration possibilities
+      if ( xmlTypeName == "integer-enumeration" )
+        {
+        const Enumeration * enumeration = m_ClassDescription->GetEnumeration( typeName );
+        if ( enumeration != NULL )
+          {
+          for ( int i = 0; i < enumeration->GetNumberOfEnumerants(); ++i )
+            {
+            os << "      <element>" << enumeration->GetEnumerantValue( i ) << "</element>\n";
+            }
+          }
+        else
+          {
+          std::cerr << "No enumeration '" << typeName << "' found!" << std::endl;
+          }
+        }
 
       os << "    </" << xmlTypeName << ">\n";
       }
@@ -286,6 +314,8 @@ Slicer4PluginGenerator
 
   os << "\n\n";
 
+  //this->WriteEnumerationCode( os );
+
   os << "namespace\n";
   os << "{\n\n";
 
@@ -298,9 +328,15 @@ Slicer4PluginGenerator
   os << "  typedef itk::Image< TInput, 3 > InputImageType;\n";
   os << "  typedef itk::Image< TInput, 3 > OutputImageType;\n\n";
 
-  os << "  typedef itk::ImageFileReader< InputImageType  > InputReaderType;\n";
-  os << "  typename InputReaderType::Pointer inputReader = InputReaderType::New();\n";
-  os << "  inputReader->SetFileName( inputVolume0.c_str() );\n\n";
+  for ( int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i )
+    {
+    os << "  typedef itk::ImageFileReader< InputImageType  > InputReaderType" << i << ";\n";
+    os << "  typename InputReaderType" << i << "::Pointer inputReader" << i
+       << " = InputReaderType" << i << "::New();\n";
+    os << "  inputReader" << i << "->SetFileName( inputVolume" << i << ".c_str() );\n\n";
+    os << "  inputReader" << i << "->Update();\n";
+    os << "  typename InputImageType::Pointer image" << i+1 << " = inputReader" << i << "->GetOutput();\n\n";
+    }
 
   os << "  typedef itk::ImageFileWriter< OutputImageType > OutputWriterType;\n\n";
   os << "  typename OutputWriterType::Pointer outputWriter = OutputWriterType::New();\n";
@@ -316,7 +352,18 @@ Slicer4PluginGenerator
 
   os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
 
-  os << "  filter->SetInput( inputReader->GetOutput() );\n";
+  if ( m_ClassDescription->GetCustomSetInput() == "<undefined>" )
+    {
+    for ( int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i )
+      {
+      os << "  filter->SetInput( " << i << ", inputReader" << i << "->GetOutput() );\n";
+      }
+    }
+  else
+    {
+    // Custom input code from the JSON file
+    os << "  " << m_ClassDescription->GetCustomSetInput();
+    }
 
   // Set parameters
   for (int i = 0; i < m_ClassDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -343,8 +390,23 @@ Slicer4PluginGenerator
       }
     else
       {
-      os << "  filter->Set" << member->GetMemberName() << "( plugins" << member->GetMemberName()
-         << " );\n";
+      // Non-vector types
+      if ( m_ClassDescription->IsEnumerationType( member->GetTypeName() ) )
+        {
+        // Have to cast integers to the enum type before setting the
+        // member value
+        std::string enumTypeName( "FilterType::" );
+        enumTypeName.append( member->GetTypeName() );
+        os << "  typename " << enumTypeName << " tmp" << member->GetMemberName() << " =\n"
+           << "    static_cast< typename " << enumTypeName << " >( plugins" << member->GetMemberName() << " );\n";
+        os << "  filter->Set" << member->GetMemberName() << "( tmp" << member->GetMemberName()
+           << " );\n";
+        }
+      else
+        {
+        os << "  filter->Set" << member->GetMemberName() << "( plugins" << member->GetMemberName()
+           << " );\n";
+        }
       }
 
     os << "\n";
@@ -397,8 +459,8 @@ Slicer4PluginGenerator
     //intType    = true;
     //ulongType  = true;
     //longType   = true;
-    //floatType  = true;
-    doubleType = true;
+    floatType  = true;
+    //doubleType = true;
     }
   else if ( pixelTypes == "ComplexPixelIDTypeList" ||
             pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
@@ -473,6 +535,29 @@ Slicer4PluginGenerator
   if ( complexDoubleType ) os << "#define ITK_COMPLEX_DOUBLE_TYPE\n";
 
   return true;
+}
+
+void
+Slicer4PluginGenerator
+::WriteEnumerationCode( std::ostream & os )
+{
+  for ( int i = 0; i < m_ClassDescription->GetNumberOfEnumerations(); ++i )
+    {
+    const Enumeration * enumeration = m_ClassDescription->GetEnumeration( i );
+
+    os << "typedef enum {\n";
+    for ( int j = 0; j < enumeration->GetNumberOfEnumerants(); ++j )
+      {
+      os << "  " << enumeration->GetEnumerantName( j ) << " = " << enumeration->GetEnumerantValue( j );
+      if ( j < enumeration->GetNumberOfEnumerants()-1 )
+        {
+        os << ",";
+        }
+      os << "\n";
+      }
+
+    os << "} " << enumeration->GetName() << ";\n\n";
+    }
 }
 
 

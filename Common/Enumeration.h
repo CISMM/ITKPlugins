@@ -22,6 +22,18 @@ public:
     m_Enumerants.push_back( std::make_pair< std::string, int >( enumerantName, value ) );
   }
 
+  int GetNumberOfEnumerants() const {
+    return static_cast< int >( m_Enumerants.size() );
+  }
+
+  const std::string & GetEnumerantName( int index ) const {
+    return m_Enumerants[index].first;
+  }
+
+  int GetEnumerantValue( int index ) const {
+    return m_Enumerants[index].second;
+  }
+
   void PrintSelf( std::ostream & os );
 
 protected:

@@ -129,6 +129,13 @@ Parser
     description->SetOutputPixelType( outputPixelType );
     }
 
+  iter = parent->find( "custom_set_input" );
+  if ( iter != parent->end() )
+    {
+    std::string customSetInput( (*iter)->as_string().c_str() );
+    description->SetCustomSetInput( customSetInput );
+    }
+
   // Parse the members of the class
   JSONNode::json_iterator members = parent->find( "members" );
   if ( (*members)->type() != JSON_ARRAY )
@@ -159,6 +166,14 @@ Parser
     if ( iter != memberNode->end() )
       {
       std::string typeName( (*iter)->as_string().c_str() );
+
+      // Check if it's a declared type in the class
+      size_t doubleColonPos = typeName.find_last_of( ':' );
+      if ( doubleColonPos != std::string::npos )
+        {
+        // Declared type. Strip everything but the end
+        typeName = typeName.substr( doubleColonPos+1 );
+        }
       memberDescription->SetTypeName( typeName );
       }
 
@@ -166,6 +181,15 @@ Parser
     if ( iter != memberNode->end() )
       {
       std::string defaultValue( (*iter)->as_string().c_str() );
+
+      // Check it if's a declared type in the class
+      size_t doubleColonPos = defaultValue.find_last_of( ':' );
+      if ( doubleColonPos != std::string::npos )
+        {
+        // Declared type. Strip everything but the end
+        defaultValue = defaultValue.substr( doubleColonPos+1 );
+        }
+
       memberDescription->SetDefaultValue( defaultValue );
       }
 
