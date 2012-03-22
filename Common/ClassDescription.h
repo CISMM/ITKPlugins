@@ -6,6 +6,7 @@
 #include <vector>
 
 class MemberDescription;
+class Enumeration;
 
 /** Describes an ITK class. */
 class ClassDescription {
@@ -70,9 +71,14 @@ public:
   }
 
   void AddMember( MemberDescription * memberDescription );
-  const MemberDescription * GetMemberDescription( int index );
+  const MemberDescription * GetMemberDescription( int index ) const;
 
   int GetNumberOfMemberDescriptions() const;
+
+  void AddEnumeration( Enumeration * enumeration );
+  const Enumeration * GetEnumeration( int index ) const;
+
+  int GetNumberOfEnumerations() const;
 
   void PrintSelf( std::ostream & os );
 
@@ -87,6 +93,7 @@ protected:
   std::string m_PixelTypes;
   std::string m_OutputPixelType;
 
+  std::vector< Enumeration * >      m_Enumerations;
   std::vector< MemberDescription *> m_Members;
 
 private:

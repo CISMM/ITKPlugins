@@ -1,5 +1,6 @@
 #include "ClassDescription.h"
 
+#include "Enumeration.h"
 #include "MemberDescription.h"
 
 ClassDescription
@@ -11,6 +12,14 @@ ClassDescription
 ClassDescription
 ::~ClassDescription()
 {
+  for ( size_t i = 0; i < m_Enumerations.size(); ++i )
+    {
+    delete m_Enumerations[i];
+    }
+  for ( size_t i = 0; i < m_Members.size(); ++i )
+    {
+    delete m_Members[i];
+    }
 }
 
 void
@@ -22,7 +31,7 @@ ClassDescription
 
 const MemberDescription *
 ClassDescription
-::GetMemberDescription( int index )
+::GetMemberDescription( int index ) const
 {
   // No bounds checking
   return m_Members[ index ];
@@ -37,6 +46,28 @@ ClassDescription
 
 void
 ClassDescription
+::AddEnumeration( Enumeration * enumeration )
+{
+  m_Enumerations.push_back( enumeration );
+}
+
+const Enumeration *
+ClassDescription
+::GetEnumeration( int index ) const
+{
+  // No bounds checking
+  return m_Enumerations[index];
+}
+
+int
+ClassDescription
+::GetNumberOfEnumerations() const
+{
+  return static_cast< int >( m_Enumerations.size() );
+}
+
+void
+ClassDescription
 ::PrintSelf( std::ostream & os )
 {
   os << "PluginName: " << m_PluginName << std::endl;
@@ -47,8 +78,16 @@ ClassDescription
 
   os << "PublicDeclarations:  " << m_PublicDeclarations << std::endl;
 
-  for (unsigned int i = 0; i < m_Members.size(); ++i)
+  os << "Enumerations: " << std::endl;
+  for ( size_t i = 0; i < m_Enumerations.size(); ++i)
+    {
+    m_Enumerations[i]->PrintSelf( os );
+    }
+
+  os << "Members: " << std::endl;
+  for ( size_t i = 0; i < m_Members.size(); ++i)
     {
     m_Members[i]->PrintSelf( os );
     }
+
 }

@@ -22,6 +22,7 @@ protected:
 
 private:
 
+  void ParseEnums( const std::string & publicDeclarations, ClassDescription * classDescription );
 };
 
 #endif
