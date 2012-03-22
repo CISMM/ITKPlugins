@@ -2,7 +2,6 @@
 #define __MemberDescription_h_
 
 #include <string>
-#include <iostream>
 
 class MemberDescription {
 public:
