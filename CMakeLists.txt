@@ -29,120 +29,135 @@ add_subdirectory( Utilities )
 
 set( Plugin_JSON
   # These compile
-  Abs
-  AbsoluteValueDifference
-  Acos
-  Add
-  AddConstantTo
-  And
-  ApproximateSignedDistanceMap
-  Asin
-  Atan
-  Atan2
-  Bilateral
-  BinaryContour
-  BinaryMagnitude
-  BinaryMinMaxCurvatureFlow
-  BinaryProjection
-  BinaryThinning
-  BinaryThreshold
-  BinomialBlur
-  BoundedReciprocal
-  CannyEdgeDetection
-  ComplexToImaginary
-  ComplexToModulus
-  ComplexToPhase
-  ComplexToReal
-  ConnectedComponent
-  ConnectedThreshold
-  ConstantPad
-  Cos
-  Crop
-  CurvatureAnisotropicDiffusion
-  CurvatureFlow
-  DanielssonDistanceMap
-  Derivative
-  DiscreteGaussian
-  Divide
-  DoubleThreshold
-  Exp
-  ExpNegative
-  FFTShift
-  GradientAnisotropicDiffusion
-  GradientMagnitudeRecursiveGaussian
-  HConcave
-  HConvex
-  HMaxima
-  HMinima
-  HuangThreshold
-  IntensityWindowing
-  IntermodesThreshold
-  InvertIntensity
-  IsoContourDistance
-  IsoDataThreshold
-  IsolatedWatershed
-  KittlerIllingworthThreshold
-  LabelContour
-  Laplacian
-  LaplacianRecursiveGaussian
-  LaplacianSharpening
-  LiThreshold
-  Log
-  Log10
-  Mask
-  MaskNegated
-  Maximum
-  MaximumEntropyThreshold
-  MaximumProjection
-  Mean
-  MeanProjection
-  MedianProjection
-  Median
-  MinMaxCurvatureFlow
-  Minimum
-  MinimumProjection
-  MirrorPad
-  Modulus
-  MomentsThreshold
-  Multiply
-  MultiplyByConstant
-  NeighborhoodConnected
-  Noise
-  Normalize
-  NormalizeToConstant
-  Not
-  Or
-  OtsuThreshold
-  Pow
-  PowToConstant
-  RenyiEntropyThreshold
-  RescaleIntensity
-  ShanbhagThreshold
-  ShiftScale
-  Shrink
-  Sigmoid
-  SignedDanielssonDistanceMap
-  SignedMaurerDistanceMap
-  SimpleContourExtractor
-  Sin
-  SobelEdgeDetection
-  Sqrt
-  Square
-  SquaredDifference
-  StandardDeviationProjection
-  Subtract
-  SubtractConstantBy
-  SumProjection
-  Tan
-  TriangleThreshold
-  WrapPad
-  Xor
-  YenThreshold
-  ZeroCrossingBasedEdgeDetection
+  #Abs
+  #AbsoluteValueDifference
+  #Acos
+  #Add
+  #AddConstantTo
+  #And
+  #ApproximateSignedDistanceMap
+  #Asin
+  #Atan
+  #Atan2
+  #Bilateral
+  #BinaryContour
+  #BinaryMagnitude
+  #BinaryMinMaxCurvatureFlow
+  #BinaryProjection
+  #BinaryThinning
+  #BinaryThreshold
+  #BinomialBlur
+  #BoundedReciprocal
+  #CannyEdgeDetection
+  #CheckerBoard
+  #ComplexToImaginary
+  #ComplexToModulus
+  #ComplexToPhase
+  #ComplexToReal
+  #ConnectedComponent
+  #ConnectedThreshold
+  #Convolution
+  #ConstantPad
+  #Cos
+  #Crop
+  #CurvatureAnisotropicDiffusion
+  #CurvatureFlow
+  #DanielssonDistanceMap
+  #Derivative
+  #DiscreteGaussian
+  #Divide
+  #DoubleThreshold
+  #Exp
+  #ExpNegative
+  #FFTConvolution
+  #FFTShift
+  #Flip
+  #GradientAnisotropicDiffusion
+  #GradientMagnitudeRecursiveGaussian
+  #HausdorffDistance
+  #HConcave
+  #HConvex
+  #HistogramMatching
+  #HMaxima
+  #HMinima
+  #HuangThreshold
+  #IntensityWindowing
+  #IntermodesThreshold
+  #InverseFFT
+  #InvertIntensity
+  #IsoContourDistance
+  #IsoDataThreshold
+  #IsolatedWatershed
+  #KittlerIllingworthThreshold
+  #LabelContour
+  #Laplacian
+  #LaplacianRecursiveGaussian
+  #LaplacianSharpening
+  #LiThreshold
+  #Log
+  #Log10
+  #MagnitudeAndPhaseToComplex
+  #Mask
+  #MaskNegated
+  #Maximum
+  #MaximumEntropyThreshold
+  #MaximumProjection
+  #Mean
+  #MeanProjection
+  #MedianProjection
+  #Median
+  #MinMaxCurvatureFlow
+  #Minimum
+  #MinimumProjection
+  #MirrorPad
+  #Modulus
+  #MomentsThreshold
+  #Multiply
+  #MultiplyByConstant
+  #NeighborhoodConnected
+  #Noise
+  #Normalize
+  #NormalizeToConstant
+  #Not
+  #Or
+  #OtsuThreshold
+  #Pow
+  #PowToConstant
+  #RealAndImaginaryToComplex
+  #RelabelComponent
+  #RenyiEntropyThreshold
+  #RescaleIntensity
+  #ScalarConnectedComponent
+  #ShanbhagThreshold
+  #ShiftScale
+  #Shrink
+  #Sigmoid
+  #SignedDanielssonDistanceMap
+  #SignedMaurerDistanceMap
+  #SimpleContourExtractor
+  #Sin
+  #SobelEdgeDetection
+  #Sqrt
+  #Square
+  #SquaredDifference
+  #StandardDeviationProjection
+  #Subtract
+  #SubtractConstantBy
+  #SumProjection
+  #Tan
+  #Threshold
+  #TriangleThreshold
+  #VotingBinary
+  #VotingBinaryHoleFilling
+  #VotingBinaryIterativeHoleFilling
+  #WrapPad
+  #Xor
+  #YenThreshold
+  #ZeroCrossingBasedEdgeDetection
 
   # These don't compile
   #-BinaryClosingByReconstruction
-  #-BinaryDilate
+  BinaryDilate
   #-BinaryErode
   #-BinaryFillhole
   #-BinaryGrindPeak
@@ -153,18 +168,14 @@ set( Plugin_JSON
   #-BlackTopHat
   #-BoxMean
   #-BoxSigma
-  #-CheckerBoard
-  #-ClosingByReconstruction
-  #-Convolution
+  #-ClosingByReconstruction - kernel image filter type
   #-DilateObjectMorphology
-  #-DivideByConstant
-  #-DivideConstantBy
-  #-EdgePotential
+  #-DivideByConstant - SimpleITK-specific typedef
+  #-DivideConstantBy - SimpleITK-specific typedef
+  #-EdgePotential - vector pixels
   #-ErodeObjectMorphology
-  #-Extract
-  #-FFTConvolution
-  #-FastMarching
-  #-Flip
+  #-Extract - names
+  #-FastMarching - custom_itk_cast
   #-ForwardFFT
   #-GeodesicActiveContourLevelSet
   #-GrayscaleDilate
@@ -175,9 +186,6 @@ set( Plugin_JSON
   #-GrayscaleGrindPeak
   #-GrayscaleMorphologicalClosing
   #-GrayscaleMorphologicalOpening
-  #-HausdorffDistance
-  #-HistogramMatching
-  #-InverseFFT
   #-LabelMapMask
   #-LabelMapOverlay
   #-LabelMapToBinary
@@ -185,31 +193,23 @@ set( Plugin_JSON
   #-LabelMapToRGB
   #-LabelOverlay
   #-LabelToRGB
-  #-MagnitudeAndPhaseToComplex
-  #-MorphologicalGradient
+  #-MorphologicalGradient - kernel image
   #-N4BiasFieldCorrection
   #-OpeningByReconstruction
   #-Paste
-  #-PermuteAxes
-  #-RealAndImaginaryToComplex
+  #-PermuteAxes - CLP generation fails
   #-RecursiveGaussian
-  #-RegionOfInterest
-  #-RelabelComponent
-  #-Resample
-  #-ScalarConnectedComponent
+  #-RegionOfInterest - variable names
+  #-Resample - malformed XML
   #-ScalarToRGBColormap
-  #-ShapeDetectionLevelSet
+  #-ShapeDetectionLevelSet - default pixel type is float, JSON doesn't change it
   #-SmoothingRecursiveGaussian
-  #-Threshold
   #-ThresholdMaximumConnectedComponents
   #-VectorConnectedComponent
   #-VectorIndexSelectionCast
   #-VectorMagnitude
-  #-VotingBinary
-  #-VotingBinaryHoleFilling
-  #-VotingBinaryIterativeHoleFilling
-  #-WhiteTopHat
-  #-ZeroCrossing
+  #-WhiteTopHat - kernel filter
+  #-ZeroCrossing - pixel type list
 )
 
 if ( BUILD_SLICER4_PLUGINS )
