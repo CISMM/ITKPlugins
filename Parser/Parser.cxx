@@ -168,8 +168,8 @@ Parser
       std::string typeName( (*iter)->as_string().c_str() );
 
       // Check if it's a declared type in the class
-      size_t doubleColonPos = typeName.find_last_of( ':' );
-      if ( doubleColonPos != std::string::npos )
+      size_t doubleColonPos = typeName.find_last_of( "::" );
+      if ( doubleColonPos != std::string::npos && typeName.find( "std::vector" ) == std::string::npos )
         {
         // Declared type. Strip everything but the end
         typeName = typeName.substr( doubleColonPos+1 );
@@ -183,8 +183,8 @@ Parser
       std::string defaultValue( (*iter)->as_string().c_str() );
 
       // Check it if's a declared type in the class
-      size_t doubleColonPos = defaultValue.find_last_of( ':' );
-      if ( doubleColonPos != std::string::npos )
+      size_t doubleColonPos = defaultValue.find_last_of( "::" );
+      if ( doubleColonPos != std::string::npos && defaultValue.find( "std::vector" ) == std::string::npos )
         {
         // Declared type. Strip everything but the end
         defaultValue = defaultValue.substr( doubleColonPos+1 );
