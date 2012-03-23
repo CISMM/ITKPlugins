@@ -259,7 +259,7 @@ Slicer4PluginGenerator
   os << "      <name>outputVolume</name>\n";
   os << "      <label>Output Volume</label>\n";
   os << "      <channel>output</channel>\n";
-  os << "      <index>" << m_ClassDescription->GetNumberOfInputs() << "</index>\n";
+  os << "      <index>" << m_ClassDescription->GetNumberOfInputs()+1 << "</index>\n";
   os << "      <description>Filter output</description>\n";
   os << "    </image>\n";
 
@@ -305,6 +305,11 @@ Slicer4PluginGenerator
   os << "#include <itkImageFileReader.h>\n";
   os << "#include <itkImageFileWriter.h>\n";
   os << "#include <itk" << filterName << ".h>\n\n";
+
+  // Need some SimpleITK heaaders
+  os << "#include <tr1/functional>\n";
+  os << "#include <tr1/type_traits>\n";
+  os << "#include <sitkConditional.h>\n\n";
 
   os << "#include \"" << m_ClassDescription->GetPluginName() << "CLP.h\"\n\n";
 
@@ -381,11 +386,21 @@ Slicer4PluginGenerator
   os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
   os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
 
+  std::cout << "Number of inputs: " << m_ClassDescription->GetCustomSetInput() << std::endl;
   if ( m_ClassDescription->GetCustomSetInput() == "<undefined>" )
     {
     for ( int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i )
       {
-      os << "  filter->SetInput( " << i << ", inputReader" << i << "->GetOutput() );\n";
+      // First input gets special treatment to avoid
+      // "Input Primary is required but not set" exception
+      if ( i == 0 )
+        {
+        os << "  filter->SetInput( inputReader" << i << "->GetOutput() );\n";
+        }
+      else
+        {
+        os << "  filter->SetInput( " << i << ", inputReader" << i << "->GetOutput() );\n";
+        }
       }
     }
   else
@@ -480,16 +495,16 @@ Slicer4PluginGenerator
        pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
        pixelTypes == "NonLabelPixelIDTypeList" )
     {
-    //ucharType  = true;
-    //charType   = true;
-    //ushortType = true;
-    //shortType  = true;
-    //uintType   = true;
-    //intType    = true;
-    //ulongType  = true;
-    //longType   = true;
+    ucharType  = true;
+    charType   = true;
+    ushortType = true;
+    shortType  = true;
+    uintType   = true;
+    intType    = true;
+    ulongType  = true;
+    longType   = true;
     floatType  = true;
-    //doubleType = true;
+    doubleType = true;
     }
   else if ( pixelTypes == "ComplexPixelIDTypeList" ||
             pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
@@ -500,14 +515,14 @@ Slicer4PluginGenerator
     }
   else if ( pixelTypes == "IntegerPixelIDTypeList" )
     {
-    //ucharType  = true;
-    //charType   = true;
-    //ushortType = true;
-    //shortType  = true;
-    //uintType   = true;
+    ucharType  = true;
+    charType   = true;
+    ushortType = true;
+    shortType  = true;
+    uintType   = true;
     intType    = true;
-    //ulongType  = true;
-    //longType   = true;
+    ulongType  = true;
+    longType   = true;
     }
   else if ( pixelTypes ==  "LabelPixelIDTypeList" )
     {
