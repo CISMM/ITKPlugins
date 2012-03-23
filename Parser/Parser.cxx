@@ -101,6 +101,11 @@ Parser
     int numInputs = atoi( (*iter)->as_string().c_str() );
     description->SetNumberOfInputs( numInputs );
     }
+  else
+    {
+    // There always has to be one input for filters
+    description->SetNumberOfInputs( 1 );
+    }
 
   // Get documentation
   iter = parent->find( "briefdescription" );
