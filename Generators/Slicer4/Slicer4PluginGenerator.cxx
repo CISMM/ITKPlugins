@@ -102,7 +102,10 @@ Slicer4PluginGenerator
   os << "<executable>\n";
 
   os << "  <category>ITK</category>\n";
-  os << "  <title>" << m_ClassDescription->GetPluginName() << "</title>\n";
+  //os << "  <title>" << m_ClassDescription->GetPluginName() <<
+  //"</title>\n";
+  os << "  <title>" << this->SplitCAMLCaseString( m_ClassDescription->GetPluginName() ) << "</title>\n";
+
   os << "  <description>\n";
   os << m_ClassDescription->GetBriefDescription();
   os << "  </description>\n";
@@ -127,7 +130,10 @@ Slicer4PluginGenerator
 {
   // Class parameters first
   os << "  <parameters>\n";
-  os << "    <label>" << m_ClassDescription->GetPluginName() << " Parameters</label>\n";
+  //os << "    <label>" << m_ClassDescription->GetPluginName() << "
+  //Parameters</label>\n";
+  os << "    <label>" << this->SplitCAMLCaseString( m_ClassDescription->GetPluginName() )
+     << " Parameters</label>\n";
   os << "    <description>Parameters for the " << m_ClassDescription->GetPluginName()
      << " class in ITK.</description>\n";
 
@@ -168,7 +174,7 @@ Slicer4PluginGenerator
       }
     else if ( m_ClassDescription->IsEnumerationType( typeName ) )
       {
-      xmlTypeName = "integer-enumeration";
+      xmlTypeName = "string-enumeration";
       }
     else
       {
@@ -182,7 +188,7 @@ Slicer4PluginGenerator
       os << "      <name>plugins" << member->GetMemberName() << "</name>\n";
       os << "      <longflag>--" << member->GetMemberName() << "</longflag>\n";
       //os << "      <description>" << member->GetBriefDescription() << "</description>\n";
-      os << "      <label>" << member->GetMemberName() << "</label>\n";
+      os << "      <label>" << this->SplitCAMLCaseString( member->GetMemberName() ) << "</label>\n";
       os << "      <default>";
 
       std::string defaultValue = member->GetDefaultValue();
@@ -216,14 +222,14 @@ Slicer4PluginGenerator
       os << "</default>\n";
 
       // Write enumeration possibilities
-      if ( xmlTypeName == "integer-enumeration" )
+      if ( xmlTypeName == "string-enumeration" )
         {
         const Enumeration * enumeration = m_ClassDescription->GetEnumeration( typeName );
         if ( enumeration != NULL )
           {
           for ( int i = 0; i < enumeration->GetNumberOfEnumerants(); ++i )
             {
-            os << "      <element>" << enumeration->GetEnumerantValue( i ) << "</element>\n";
+            os << "      <element>" << enumeration->GetEnumerantName( i ) << "</element>\n";
             }
           }
         else
@@ -331,21 +337,21 @@ Slicer4PluginGenerator
 
   os << "  PARSE_ARGS;\n\n";
 
-  os << "  typedef itk::Image< TInput, 3 > InputImageType;\n";
+  os << "  typedef itk::Image< TInput, 2 > InputImageType;\n";
   for ( int i = 1; i < m_ClassDescription->GetNumberOfInputs(); ++i )
     {
-    os << "  typedef itk::Image< TInput, 3 > InputImageType" << i+1 << ";\n";
+    os << "  typedef itk::Image< TInput, 2 > InputImageType" << i+1 << ";\n";
     }
 
   if ( m_ClassDescription->GetOutputPixelType() != "" )
     {
     // Custom pixel type
-    os << "  typedef itk::Image< " << m_ClassDescription->GetOutputPixelType() << ", 3 > OutputImageType;\n";
+    os << "  typedef itk::Image< " << m_ClassDescription->GetOutputPixelType() << ", 2 > OutputImageType;\n";
     }
   else
     {
     // Standard pixel type
-    os << "  typedef itk::Image< TInput, 3 > OutputImageType;\n\n";
+    os << "  typedef itk::Image< TInput, 2 > OutputImageType;\n\n";
     }
 
   for ( int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i )
@@ -437,14 +443,25 @@ Slicer4PluginGenerator
       // Non-vector types
       if ( m_ClassDescription->IsEnumerationType( member->GetTypeName() ) )
         {
-        // Have to cast integers to the enum type before setting the
-        // member value
-        std::string enumTypeName( "FilterType::" );
-        enumTypeName.append( member->GetTypeName() );
-        os << "  typename " << enumTypeName << " tmp" << member->GetMemberName() << " =\n"
-           << "    static_cast< typename " << enumTypeName << " >( plugins" << member->GetMemberName() << " );\n";
-        os << "  filter->Set" << member->GetMemberName() << "( tmp" << member->GetMemberName()
-           << " );\n";
+        // Convert from enum name to enum value
+        const Enumeration * enumeration = m_ClassDescription->GetEnumeration( member->GetTypeName() );
+        for ( int i = 0; i < enumeration->GetNumberOfEnumerants(); ++i )
+          {
+          os << "  ";
+          if ( i > 0 )
+            {
+            os << "else ";
+            }
+
+          os << "if ( plugins" << member->GetMemberName() << " == \"" << enumeration->GetEnumerantName( i ) << "\" )\n";
+          os << "    {\n";
+          os << "    filter->Set" << member->GetMemberName() << "( FilterType::" << enumeration->GetEnumerantName( i ) << " );\n";
+          os << "    }\n";
+          }
+        os << "  else\n";
+        os << "    {\n";
+        os << "    std::cout << \"Unknown OutputRegionMode given\" << std::endl;\n";
+        os << "    }\n";
         }
       else
         {
@@ -620,4 +637,32 @@ Slicer4PluginGenerator
   if ( numberOfInputs < 1 ) numberOfInputs++;
 
   return numberOfInputs;
+}
+
+std::string
+Slicer4PluginGenerator
+::SplitCAMLCaseString( const std::string & input )
+{
+  size_t inputSize = input.size();
+  std::string outputString( input.substr( 0, 1) );
+  bool previousCapital = true;
+  for ( size_t i = 1; i < inputSize; ++i )
+    {
+    if ( this->IsCapitalLetter( input[i] ) )
+      {
+      if ( !previousCapital )
+        {
+        outputString.append( " " );
+        }
+      previousCapital = true;
+      }
+    else
+      {
+      previousCapital = false;
+      }
+
+    outputString.append( input.substr( i, 1 ) );
+    }
+
+    return outputString;
 }

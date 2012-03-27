@@ -35,6 +35,15 @@ private:
   void WriteEnumerationCode( std::ostream & os );
 
   int GetNumberOfInputs();
+
+  // Splits a stringn of text in CAML case by inserting a space before
+  // every capital letter except the first and except for groups of
+  // capital letters
+  std::string SplitCAMLCaseString( const std::string & input );
+
+  bool IsCapitalLetter( char letter ) {
+    return letter >= 'A' && letter <= 'Z';
+  }
 };
 
 #endif
