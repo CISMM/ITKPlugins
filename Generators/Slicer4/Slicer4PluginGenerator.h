@@ -4,6 +4,7 @@
 #include <string>
 
 class ClassDescription;
+class MemberDescription;
 
 class Slicer4PluginGenerator {
 public:
@@ -44,6 +45,10 @@ private:
   bool IsCapitalLetter( char letter ) {
     return letter >= 'A' && letter <= 'Z';
   }
+
+  std::string SubstituteString( const std::string & toFind, const std::string & toReplace,
+                                const std::string & input );
+
 };
 
 #endif

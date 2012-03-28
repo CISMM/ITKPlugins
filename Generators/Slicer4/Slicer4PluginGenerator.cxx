@@ -312,6 +312,12 @@ Slicer4PluginGenerator
   os << "#include <itkImageFileWriter.h>\n";
   os << "#include <itk" << filterName << ".h>\n\n";
 
+  // Add additional files requested in the ClassDescription
+  for ( int i = 0; i < m_ClassDescription->GetNumberOfIncludeFiles(); ++i )
+    {
+    os << "#include <" << m_ClassDescription->GetIncludeFile( i ) << ">\n";
+    }
+
   // Need some SimpleITK heaaders
   os << "#include <tr1/functional>\n";
   os << "#include <tr1/type_traits>\n";
@@ -326,7 +332,7 @@ Slicer4PluginGenerator
 
   os << "\n\n";
 
-  //this->WriteEnumerationCode( os );
+  this->WriteEnumerationCode( os );
 
   os << "namespace\n";
   os << "{\n\n";
@@ -412,7 +418,7 @@ Slicer4PluginGenerator
   else
     {
     // Custom input code from the JSON file
-    os << "  " << m_ClassDescription->GetCustomSetInput();
+    os << "  " << m_ClassDescription->GetCustomSetInput() << "\n";
     }
 
   // Set parameters
@@ -420,23 +426,24 @@ Slicer4PluginGenerator
     {
     const MemberDescription * member = m_ClassDescription->GetMemberDescription( i );
 
+    // If there is custom set code, use it instead of generating our
+    // own
+    if ( member->GetCustomITKCast() != "<undefined>" && !m_ClassDescription->IsEnumerationType( member->GetTypeName() ) )
+      {
+      os << "  " << member->GetCustomITKCast() << "\n";
+      continue;
+      }
+
     if ( member->GetTypeName().find( "vector" ) != std::string::npos )
       {
       os << "  " << member->GetITKType() << " tmp" << member->GetMemberName() << ";\n";
 
-      if ( member->GetCustomITKCast() != "<undefined>" )
+      for ( int i = 0; i < 3; ++i )
         {
-        os << member->GetCustomITKCast() << "\n";
+        os << "  tmp" << member->GetMemberName() << "[" << i << "] = plugins" << member->GetMemberName() << "[" << i << "];\n";
         }
-      else
-        {
-        for ( int i = 0; i < 3; ++i )
-          {
-          os << "  tmp" << member->GetMemberName() << "[" << i << "] = plugins" << member->GetMemberName() << "[" << i << "];\n";
-          }
-        os << "  filter->Set" << member->GetMemberName() << "( tmp" << member->GetMemberName()
-           << " );\n";
-        }
+      os << "  filter->Set" << member->GetMemberName() << "( tmp" << member->GetMemberName()
+         << " );\n";
       }
     else
       {
@@ -445,6 +452,9 @@ Slicer4PluginGenerator
         {
         // Convert from enum name to enum value
         const Enumeration * enumeration = m_ClassDescription->GetEnumeration( member->GetTypeName() );
+        os << "\n  " << enumeration->GetName() << " tmp" << member->GetMemberName() << ";\n";
+
+
         for ( int i = 0; i < enumeration->GetNumberOfEnumerants(); ++i )
           {
           os << "  ";
@@ -455,13 +465,27 @@ Slicer4PluginGenerator
 
           os << "if ( plugins" << member->GetMemberName() << " == \"" << enumeration->GetEnumerantName( i ) << "\" )\n";
           os << "    {\n";
-          os << "    filter->Set" << member->GetMemberName() << "( FilterType::" << enumeration->GetEnumerantName( i ) << " );\n";
+          //os << "    filter->Set" << member->GetMemberName() << "(
+          //FilterType::" << enumeration->GetEnumerantName( i ) << "
+          //);\n";
+          os << "    tmp" << member->GetMemberName() << " = " << enumeration->GetEnumerantName( i ) << ";\n";
           os << "    }\n";
           }
         os << "  else\n";
         os << "    {\n";
-        os << "    std::cout << \"Unknown OutputRegionMode given\" << std::endl;\n";
+        os << "    std::cout << \"Unknown " << enumeration->GetName() << " given\" << std::endl;\n";
         os << "    }\n";
+
+        // Now write out any custom code for the enumeration,
+        // modifying the assumed variable names to fit out purposes
+        if ( member->GetCustomITKCast() != "<undefined>" )
+          {
+          std::string code( member->GetCustomITKCast() );
+          code = this->SubstituteString( "this->m_", "tmp", code );
+          code = this->SubstituteString( "m_", "tmp", code );
+
+          os << "  " << code << "\n";
+          }
         }
       else
         {
@@ -621,7 +645,6 @@ Slicer4PluginGenerator
     }
 }
 
-
 int
 Slicer4PluginGenerator
 ::GetNumberOfInputs()
@@ -666,3 +689,20 @@ Slicer4PluginGenerator
 
     return outputString;
 }
+
+std::string
+Slicer4PluginGenerator
+::SubstituteString( const std::string & toFind, const std::string & toReplace,
+                    const std::string & input )
+{
+  std::string output( input );
+  size_t nextPos = input.find( toFind );
+  while ( nextPos != std::string::npos )
+    {
+    output.replace( nextPos, toFind.size(), toReplace );
+    nextPos = output.find( toFind );
+    }
+
+  return output;
+}
+
