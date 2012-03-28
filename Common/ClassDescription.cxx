@@ -25,6 +25,27 @@ ClassDescription
 
 void
 ClassDescription
+::AddIncludeFile( const std::string & includeFile )
+{
+  m_IncludeFiles.push_back( includeFile );
+}
+
+const std::string &
+ClassDescription
+::GetIncludeFile( int index ) const
+{
+  return m_IncludeFiles[ index ];
+}
+
+int
+ClassDescription
+::GetNumberOfIncludeFiles() const
+{
+  return static_cast< int >( m_IncludeFiles.size() );
+}
+
+void
+ClassDescription
 ::AddMember( MemberDescription * memberDescription )
 {
   m_Members.push_back( memberDescription );

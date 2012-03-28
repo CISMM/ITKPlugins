@@ -91,17 +91,18 @@ public:
     return m_CustomSetInput;
   }
 
+  void AddIncludeFile( const std::string & includeFile );
+  const std::string & GetIncludeFile( int index ) const;
+  int GetNumberOfIncludeFiles() const;
+
   void AddMember( MemberDescription * memberDescription );
   const MemberDescription * GetMemberDescription( int index ) const;
-
   int GetNumberOfMemberDescriptions() const;
 
   void AddEnumeration( Enumeration * enumeration );
   const Enumeration * GetEnumeration( int index ) const;
   const Enumeration * GetEnumeration( const std::string & name ) const;
-
   int GetNumberOfEnumerations() const;
-
   bool IsEnumerationType( const std::string & name );
 
   void PrintSelf( std::ostream & os );
@@ -115,14 +116,16 @@ protected:
   std::string m_BriefDescription;
   std::string m_DetailedDescription;
 
+  std::vector< std::string > m_IncludeFiles;
+
   std::string m_PublicDeclarations;
   std::string m_PixelTypes;
   std::string m_OutputPixelType;
 
   std::string m_CustomSetInput;
 
-  std::vector< Enumeration * >      m_Enumerations;
   std::vector< MemberDescription *> m_Members;
+  std::vector< Enumeration * >      m_Enumerations;
 
 private:
 };
