@@ -132,6 +132,21 @@ Parser
     this->ParseEnums( publicDeclarations, description );
     }
 
+  // Additional include files
+  iter = parent->find( "include_files" );
+  if ( iter != parent->end() )
+    {
+    // Iterate through the additional includes
+    JSONNode includeArray = (*iter)->as_array();
+    JSONNode::json_iterator includeIter = includeArray.begin();
+    while ( includeIter != includeArray.end() )
+      {
+      std::string includeString( (*includeIter)->as_string().c_str() );
+      description->AddIncludeFile( includeString );
+      includeIter++;
+      }
+    }
+
   // Input pixel types
   iter = parent->find( "pixel_types" );
   if ( iter != parent->end() )
@@ -237,14 +252,38 @@ Parser
 ::ParseEnums( const std::string & publicDeclarations, ClassDescription * classDescription )
 {
   // See if there are any enums in the public declarations
-  // If so, we assume that there are no other declarations
+  // If so, parse all of them
   if ( publicDeclarations.find( "enum" ) == std::string::npos )
     {
     return;
     }
 
+  // Iterate over the enum declarations
+  std::string remaining( publicDeclarations );
+
+  while ( true )
+    {
+    size_t typenamePos = remaining.find( "typedef" );
+    size_t semicolonPos = remaining.find( ";" );
+    if ( typenamePos == std::string::npos || semicolonPos == std::string::npos )
+      {
+      return;
+      }
+
+    std::string enumString = remaining.substr( typenamePos, semicolonPos-typenamePos+1 );
+    std::cout << "enumString: " << enumString << std::endl;
+    this->ParseOneEnum( enumString, classDescription );
+    remaining = remaining.substr( semicolonPos + 1 );
+    }
+}
+
+void
+Parser
+::ParseOneEnum( const std::string & enumDeclaration, ClassDescription * classDescription )
+{
+
   // Get the right curly brace position
-  size_t rightBracePos = publicDeclarations.find( '}' );
+  size_t rightBracePos = enumDeclaration.find( '}' );
   if ( rightBracePos == std::string::npos )
     {
     std::cerr << "No right curly brace '}' found in enum declaration." << std::endl;
@@ -252,23 +291,23 @@ Parser
     }
 
   // Get the name
-  size_t namePos = publicDeclarations.find_first_not_of( ' ', rightBracePos+1 );
+  size_t namePos = enumDeclaration.find_first_not_of( ' ', rightBracePos+1 );
   if ( namePos == std::string::npos )
     {
     std::cerr << "No name given for enum" << std::endl;
     return;
     }
-  size_t endNamePos = publicDeclarations.find_last_not_of( ';' );
+  size_t endNamePos = enumDeclaration.find_last_not_of( ';' );
   if ( endNamePos == std::string::npos )
     {
     std::cerr << "Error while getting name of enum" << std::endl;
     return;
     }
-  std::string enumName = publicDeclarations.substr( namePos, endNamePos-namePos+1 );
-  std::cout << enumName << std::endl;
+  std::string enumName = enumDeclaration.substr( namePos, endNamePos-namePos+1 );
+  //std::cout << enumName << std::endl;
 
   // Get the individual enumerants
-  size_t leftBracePos = publicDeclarations.find( '{' );
+  size_t leftBracePos = enumDeclaration.find( '{' );
   if ( leftBracePos == std::string::npos )
     {
     std::cerr << "No left curly brace '{' found in enum declaration." << std::endl;
@@ -287,7 +326,7 @@ Parser
   while ( startPos < rightBracePos )
     {
     // Find the start of the enum name
-    size_t enumStartPos = publicDeclarations.find_first_not_of( ' ', startPos );
+    size_t enumStartPos = enumDeclaration.find_first_not_of( ' ', startPos );
     if ( enumStartPos == rightBracePos )
       {
       break;
@@ -295,7 +334,7 @@ Parser
 
     // Get the entire enum substring up to the comma (may include an
     // assigned integer value)
-    size_t enumEndPos = publicDeclarations.find_first_of( ',', enumStartPos );
+    size_t enumEndPos = enumDeclaration.find_first_of( ',', enumStartPos );
     if ( enumEndPos == std::string::npos )
       {
       // We must be at the last enumerant. Capture up to the right
@@ -312,7 +351,7 @@ Parser
     startPos = enumEndPos+1;
 
     // Now process the enumerant string
-    std::string enumerantString = publicDeclarations.substr( enumStartPos, enumEndPos-enumStartPos );
+    std::string enumerantString = enumDeclaration.substr( enumStartPos, enumEndPos-enumStartPos );
 
     // Trim the enumerant string on the left and right
     size_t begin = enumerantString.find_first_not_of( ' ' );
