@@ -33,7 +33,7 @@ set( Plugin_JSON
   #AbsoluteValueDifference
   #Acos
   #Add
-  #AddConstantTo
+  AddConstantTo
   #And
   #ApproximateSignedDistanceMap
   #Asin
@@ -57,32 +57,35 @@ set( Plugin_JSON
   #ConnectedComponent
   #ConnectedThreshold
   #Convolution
-  #ConstantPad
+  ConstantPad
   #Cos
   #Crop
-  #CurvatureAnisotropicDiffusion
-  #CurvatureFlow
+  CurvatureAnisotropicDiffusion
+  CurvatureFlow
   #DanielssonDistanceMap
   #Derivative
   #DiscreteGaussian
   #Divide
+  #DivideByConstant
+  #DivideConstantBy
   #DoubleThreshold
   #Exp
   #ExpNegative
-  #FFTConvolution
+  FFTConvolution
   #FFTShift
-  #Flip
+  Flip
   #GradientAnisotropicDiffusion
   #GradientMagnitudeRecursiveGaussian
   #HausdorffDistance
   #HConcave
   #HConvex
-  #HistogramMatching
+  ##-HistogramMatching
   #HMaxima
   #HMinima
   #HuangThreshold
   #IntensityWindowing
   #IntermodesThreshold
+  InverseDeconvolution
   #InverseFFT
   #InvertIntensity
   #IsoContourDistance
@@ -90,6 +93,7 @@ set( Plugin_JSON
   #IsolatedWatershed
   #KittlerIllingworthThreshold
   #LabelContour
+  #LandweberDeconvolution
   #Laplacian
   #LaplacianRecursiveGaussian
   #LaplacianSharpening
@@ -123,10 +127,12 @@ set( Plugin_JSON
   #OtsuThreshold
   #Pow
   #PowToConstant
+  #ProjectedLandweberDeconvolution
   #RealAndImaginaryToComplex
   #RelabelComponent
   #RenyiEntropyThreshold
   #RescaleIntensity
+  #RichardsonLucyDeconvolution
   #ScalarConnectedComponent
   #ShanbhagThreshold
   #ShiftScale
@@ -144,20 +150,22 @@ set( Plugin_JSON
   #Subtract
   #SubtractConstantBy
   #SumProjection
+  #TikhonovDeconvolution
   #Tan
   #Threshold
   #TriangleThreshold
   #VotingBinary
   #VotingBinaryHoleFilling
   #VotingBinaryIterativeHoleFilling
+  #WienerDeconvolution
   #WrapPad
   #Xor
   #YenThreshold
   #ZeroCrossingBasedEdgeDetection
 
-  # These don't compile
+  # These don't compile yet
   #-BinaryClosingByReconstruction
-  BinaryDilate
+  #-BinaryDilate
   #-BinaryErode
   #-BinaryFillhole
   #-BinaryGrindPeak
@@ -170,12 +178,10 @@ set( Plugin_JSON
   #-BoxSigma
   #-ClosingByReconstruction - kernel image filter type
   #-DilateObjectMorphology
-  #-DivideByConstant - SimpleITK-specific typedef
-  #-DivideConstantBy - SimpleITK-specific typedef
   #-EdgePotential - vector pixels
   #-ErodeObjectMorphology
   #-Extract - names
-  #-FastMarching - custom_itk_cast
+  #-FastMarching
   #-ForwardFFT
   #-GeodesicActiveContourLevelSet
   #-GrayscaleDilate
@@ -199,7 +205,7 @@ set( Plugin_JSON
   #-Paste
   #-PermuteAxes - CLP generation fails
   #-RecursiveGaussian
-  #-RegionOfInterest - variable names
+  #-RegionOfInterest
   #-Resample - malformed XML
   #-ScalarToRGBColormap
   #-ShapeDetectionLevelSet - default pixel type is float, JSON doesn't change it
@@ -217,6 +223,17 @@ if ( BUILD_SLICER4_PLUGINS )
   set( EXTENSION_NAME ITKPluginsExtension )
   find_package( Slicer REQUIRED )
   include( ${Slicer_USE_FILE} )
+
+endif()
+
+if ( BUILD_PARAVIEW3_PLUGINS )
+
+  find_package( ParaView REQUIRED )
+  include( ${PARAVIEW_USE_FILE} )
+
+  # Need to include ITK separately because ParaView doesn't know anything about it
+  find_package( ITK REQUIRED )
+  include( ${ITK_USE_FILE} )
 
 endif()
 
