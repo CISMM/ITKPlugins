@@ -1,11 +1,12 @@
 include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/Slicer4" )
 include_directories( "/Users/quammen/dev/build/SimpleITK-build" )
 
+set( GENERATED_CODE_DIRECTORY "${ITKPlugins_BINARY_DIR}/GeneratedCode/Slicer4" )
+
 foreach( PLUGIN_NAME ${Plugin_JSON} )
 
   # Hack to get slicerMacroBuildCLI to stop causing a fatal error when it can't find
   # the not-yet-generated XML file
-  set( GENERATED_CODE_DIRECTORY "${ITKPlugins_BINARY_DIR}/GeneratedCode/Slicer4" )
   file( WRITE "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml" )
 
     add_custom_command( OUTPUT "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.cxx"

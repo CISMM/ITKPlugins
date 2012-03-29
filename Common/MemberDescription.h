@@ -43,6 +43,10 @@ public:
     return m_CustomITKCast;
   }
 
+  int GetNumberOfElements() const;
+
+  std::string GetElementDefaultValue() const;
+
   void PrintSelf( std::ostream & os );
 
 protected:

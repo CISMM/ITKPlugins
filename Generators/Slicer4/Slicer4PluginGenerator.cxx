@@ -9,8 +9,7 @@
 #include "MemberDescription.h"
 
 Slicer4PluginGenerator
-::Slicer4PluginGenerator() :
-  m_ClassDescription( NULL )
+::Slicer4PluginGenerator()
 {
 }
 
@@ -19,39 +18,11 @@ Slicer4PluginGenerator
 {
 }
 
-void
-Slicer4PluginGenerator
-::SetClassDescription( ClassDescription * classDescription )
-{
-  m_ClassDescription = classDescription;
-}
-
-ClassDescription *
-Slicer4PluginGenerator
-::GetClassDescription() const
-{
-  return m_ClassDescription;
-}
-
-void
-Slicer4PluginGenerator
-::SetPluginPath( const std::string & path )
-{
-  m_PluginPath = path;
-}
-
-const std::string &
-Slicer4PluginGenerator
-::GetPluginPath() const
-{
-  return m_PluginPath;
-}
-
 bool
 Slicer4PluginGenerator
 ::Generate()
 {
-  if ( !m_ClassDescription )
+  if ( !this->GetClassDescription() )
     {
     std::cerr << "No ClassDescription set in Slicer4PluginGenerator" << std::endl;
     return false;
@@ -59,15 +30,15 @@ Slicer4PluginGenerator
 
   if ( !this->GenerateXML() )
     {
-    std::cerr << "Failed to generate XML description for plugin '" << m_PluginPath << "/"
-              << m_ClassDescription->GetPluginName() << "'.";
+    std::cerr << "Failed to generate XML description for plugin '" << this->GetPluginPath() << "/"
+              << this->GetClassDescription()->GetPluginName() << "'.";
     return false;
     }
 
   if ( !this->GenerateCode() )
     {
-    std::cerr << "Failed to generate code for plugin '" << m_ClassDescription->GetPluginName()
-              << "/" << m_ClassDescription->GetPluginName() << "'.";
+    std::cerr << "Failed to generate code for plugin '" << this->GetClassDescription()->GetPluginName()
+              << "/" << this->GetClassDescription()->GetPluginName() << "'.";
     return false;
     }
 
@@ -79,8 +50,8 @@ Slicer4PluginGenerator
 ::GenerateXML()
 {
   // Open file for writing
-  std::string filePath( m_PluginPath );
-  char lastChar = *( m_PluginPath.rbegin() );
+  std::string filePath( this->GetPluginPath() );
+  char lastChar = *( this->GetPluginPath().rbegin() );
   if ( lastChar != '/' && lastChar != '\\' )
     {
     // Add delimiter
@@ -90,10 +61,10 @@ Slicer4PluginGenerator
     filePath.append( "/" );
 #endif
     }
-  filePath.append( m_ClassDescription->GetPluginName() );
+  filePath.append( this->GetClassDescription()->GetPluginName() );
   filePath.append( ".xml" );
 
-  std::cout << "Writing Slicer4 plugin XML file for " << m_ClassDescription->GetPluginName()
+  std::cout << "Writing Slicer4 plugin XML file for " << this->GetClassDescription()->GetPluginName()
             << std::endl;
 
   std::ofstream os( filePath.c_str() );
@@ -102,12 +73,12 @@ Slicer4PluginGenerator
   os << "<executable>\n";
 
   os << "  <category>ITK</category>\n";
-  //os << "  <title>" << m_ClassDescription->GetPluginName() <<
+  //os << "  <title>" << this->GetClassDescription()->GetPluginName() <<
   //"</title>\n";
-  os << "  <title>" << this->SplitCAMLCaseString( m_ClassDescription->GetPluginName() ) << "</title>\n";
+  os << "  <title>" << this->SplitCAMLCaseString( this->GetClassDescription()->GetPluginName() ) << "</title>\n";
 
   os << "  <description>\n";
-  os << m_ClassDescription->GetBriefDescription();
+  os << this->GetClassDescription()->GetBriefDescription();
   os << "  </description>\n";
   os << "  <version>1.0</version>\n";
   os << "  <documentation-url></documentation-url>\n";
@@ -130,16 +101,14 @@ Slicer4PluginGenerator
 {
   // Class parameters first
   os << "  <parameters>\n";
-  //os << "    <label>" << m_ClassDescription->GetPluginName() << "
-  //Parameters</label>\n";
-  os << "    <label>" << this->SplitCAMLCaseString( m_ClassDescription->GetPluginName() )
+  os << "    <label>" << this->SplitCAMLCaseString( this->GetClassDescription()->GetPluginName() )
      << " Parameters</label>\n";
-  os << "    <description>Parameters for the " << m_ClassDescription->GetPluginName()
+  os << "    <description>Parameters for the " << this->GetClassDescription()->GetPluginName()
      << " class in ITK.</description>\n";
 
-  for (int i = 0; i < m_ClassDescription->GetNumberOfMemberDescriptions(); ++i)
+  for (int i = 0; i < this->GetClassDescription()->GetNumberOfMemberDescriptions(); ++i)
     {
-    const MemberDescription * member = m_ClassDescription->GetMemberDescription( i );
+    const MemberDescription * member = this->GetClassDescription()->GetMemberDescription( i );
     std::string typeName = member->GetTypeName();
     std::string xmlTypeName;
     bool typeKnown = true;
@@ -172,7 +141,7 @@ Slicer4PluginGenerator
       {
       xmlTypeName = "double-vector";
       }
-    else if ( m_ClassDescription->IsEnumerationType( typeName ) )
+    else if ( this->GetClassDescription()->IsEnumerationType( typeName ) )
       {
       xmlTypeName = "string-enumeration";
       }
@@ -224,7 +193,7 @@ Slicer4PluginGenerator
       // Write enumeration possibilities
       if ( xmlTypeName == "string-enumeration" )
         {
-        const Enumeration * enumeration = m_ClassDescription->GetEnumeration( typeName );
+        const Enumeration * enumeration = this->GetClassDescription()->GetEnumeration( typeName );
         if ( enumeration != NULL )
           {
           for ( int i = 0; i < enumeration->GetNumberOfEnumerants(); ++i )
@@ -265,7 +234,7 @@ Slicer4PluginGenerator
   os << "      <name>outputVolume</name>\n";
   os << "      <label>Output Volume</label>\n";
   os << "      <channel>output</channel>\n";
-  os << "      <index>" << m_ClassDescription->GetNumberOfInputs()+1 << "</index>\n";
+  os << "      <index>" << this->GetClassDescription()->GetNumberOfInputs()+1 << "</index>\n";
   os << "      <description>Filter output</description>\n";
   os << "    </image>\n";
 
@@ -277,8 +246,8 @@ Slicer4PluginGenerator
 ::GenerateCode()
 {
   // Open file for writing
-  std::string filePath( m_PluginPath );
-  char lastChar = *( m_PluginPath.rbegin() );
+  std::string filePath( this->GetPluginPath() );
+  char lastChar = *( this->GetPluginPath().rbegin() );
   if ( lastChar != '/' || lastChar != '\\' )
     {
     // Add delimiter
@@ -288,20 +257,20 @@ Slicer4PluginGenerator
     filePath.append( "/" );
 #endif
     }
-  filePath.append( m_ClassDescription->GetPluginName() );
+  filePath.append( this->GetClassDescription()->GetPluginName() );
   filePath.append( ".cxx" );
 
-  std::cout << "Writing Slicer4 plugin CXX file for " << m_ClassDescription->GetPluginName()
+  std::cout << "Writing Slicer4 plugin CXX file for " << this->GetClassDescription()->GetPluginName()
             << std::endl;
 
   // Useful variables
-  std::string filterName( m_ClassDescription->GetPluginName() );
+  std::string filterName( this->GetClassDescription()->GetPluginName() );
   filterName.append( "ImageFilter" );
 
   // Override the filter name if it is explicit in the JSON file
-  if ( m_ClassDescription->GetITKClassName() != "" )
+  if ( this->GetClassDescription()->GetITKClassName() != "" )
     {
-    filterName = m_ClassDescription->GetITKClassName();
+    filterName = this->GetClassDescription()->GetITKClassName();
     }
 
   std::ofstream os( filePath.c_str() );
@@ -316,12 +285,12 @@ Slicer4PluginGenerator
   os << "#include <itk" << filterName << ".h>\n\n";
 
   // Add additional files requested in the ClassDescription
-  for ( int i = 0; i < m_ClassDescription->GetNumberOfIncludeFiles(); ++i )
+  for ( int i = 0; i < this->GetClassDescription()->GetNumberOfIncludeFiles(); ++i )
     {
-    os << "#include <" << m_ClassDescription->GetIncludeFile( i ) << ">\n";
+    os << "#include <" << this->GetClassDescription()->GetIncludeFile( i ) << ">\n";
     }
 
-  os << "#include \"" << m_ClassDescription->GetPluginName() << "CLP.h\"\n\n";
+  os << "#include \"" << this->GetClassDescription()->GetPluginName() << "CLP.h\"\n\n";
 
   if ( !this->WritePixelTypeDefinitions( os ) )
     {
@@ -342,15 +311,15 @@ Slicer4PluginGenerator
   os << "  PARSE_ARGS;\n\n";
 
   os << "  typedef itk::Image< TInput, 2 > InputImageType;\n";
-  for ( int i = 1; i < m_ClassDescription->GetNumberOfInputs(); ++i )
+  for ( int i = 1; i < this->GetClassDescription()->GetNumberOfInputs(); ++i )
     {
     os << "  typedef itk::Image< TInput, 2 > InputImageType" << i+1 << ";\n";
     }
 
-  if ( m_ClassDescription->GetOutputPixelType() != "" )
+  if ( this->GetClassDescription()->GetOutputPixelType() != "" )
     {
     // Custom pixel type
-    os << "  typedef itk::Image< " << m_ClassDescription->GetOutputPixelType() << ", 2 > OutputImageType;\n";
+    os << "  typedef itk::Image< " << this->GetClassDescription()->GetOutputPixelType() << ", 2 > OutputImageType;\n";
     }
   else
     {
@@ -358,7 +327,7 @@ Slicer4PluginGenerator
     os << "  typedef itk::Image< TInput, 2 > OutputImageType;\n\n";
     }
 
-  for ( int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i )
+  for ( int i = 0; i < this->GetClassDescription()->GetNumberOfInputs(); ++i )
     {
     os << "  typedef itk::ImageFileReader< InputImageType  > InputReaderType" << i << ";\n";
     os << "  typename InputReaderType" << i << "::Pointer inputReader" << i
@@ -372,12 +341,12 @@ Slicer4PluginGenerator
   os << "  typename OutputWriterType::Pointer outputWriter = OutputWriterType::New();\n";
   os << "  outputWriter->SetFileName( outputVolume.c_str() );\n\n";
 
-  if ( m_ClassDescription->GetFilterType() != "" )
+  if ( this->GetClassDescription()->GetFilterType() != "" )
     {
     // Custom filter type declaration from JSON file
-    os << "  typedef " << m_ClassDescription->GetFilterType() << " FilterType;\n";
+    os << "  typedef " << this->GetClassDescription()->GetFilterType() << " FilterType;\n";
     }
-  else if ( m_ClassDescription->GetTemplateCodeFileName() == "KernelImageFilter" )
+  else if ( this->GetClassDescription()->GetTemplateCodeFileName() == "KernelImageFilter" )
     {
     // Kernel filtering class of filters
     os << "  typedef itk::" << filterName << "< InputImageType, InputImageType, InputImageType > FilterType;\n";
@@ -396,10 +365,10 @@ Slicer4PluginGenerator
   os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
   os << "  itk::PluginFilterWatcher watcher( filter, \"" << filterName << "\", CLPProcessInformation );\n\n";
 
-  std::cout << "Number of inputs: " << m_ClassDescription->GetCustomSetInput() << std::endl;
-  if ( m_ClassDescription->GetCustomSetInput() == "<undefined>" )
+  std::cout << "Number of inputs: " << this->GetClassDescription()->GetCustomSetInput() << std::endl;
+  if ( this->GetClassDescription()->GetCustomSetInput() == "<undefined>" )
     {
-    for ( int i = 0; i < m_ClassDescription->GetNumberOfInputs(); ++i )
+    for ( int i = 0; i < this->GetClassDescription()->GetNumberOfInputs(); ++i )
       {
       // First input gets special treatment to avoid
       // "Input Primary is required but not set" exception
@@ -416,20 +385,20 @@ Slicer4PluginGenerator
   else
     {
     // Custom input code from the JSON file
-    std::string code( m_ClassDescription->GetCustomSetInput() );
+    std::string code( this->GetClassDescription()->GetCustomSetInput() );
     code = this->SubstituteString( "this->m_", "plugins", code );
     code = this->SubstituteString( "m_", "plugins", code );
     os << "  " << code << "\n";
     }
 
   // Set parameters
-  for (int i = 0; i < m_ClassDescription->GetNumberOfMemberDescriptions(); ++i)
+  for (int i = 0; i < this->GetClassDescription()->GetNumberOfMemberDescriptions(); ++i)
     {
-    const MemberDescription * member = m_ClassDescription->GetMemberDescription( i );
+    const MemberDescription * member = this->GetClassDescription()->GetMemberDescription( i );
 
     // If there is custom set code, use it instead of generating our
     // own
-    if ( member->GetCustomITKCast() != "<undefined>" && !m_ClassDescription->IsEnumerationType( member->GetTypeName() ) )
+    if ( member->GetCustomITKCast() != "<undefined>" && !this->GetClassDescription()->IsEnumerationType( member->GetTypeName() ) )
       {
       std::string code( member->GetCustomITKCast() );
       code = this->SubstituteString( "this->m_", "plugins", code );
@@ -454,10 +423,10 @@ Slicer4PluginGenerator
     else
       {
       // Non-vector types
-      if ( m_ClassDescription->IsEnumerationType( member->GetTypeName() ) )
+      if ( this->GetClassDescription()->IsEnumerationType( member->GetTypeName() ) )
         {
         // Convert from enum name to enum value
-        const Enumeration * enumeration = m_ClassDescription->GetEnumeration( member->GetTypeName() );
+        const Enumeration * enumeration = this->GetClassDescription()->GetEnumeration( member->GetTypeName() );
         os << "\n  " << enumeration->GetName() << " tmp" << member->GetMemberName() << ";\n";
 
 
@@ -537,7 +506,7 @@ Slicer4PluginGenerator
   bool complexFloatType  = false;
   bool complexDoubleType = false;
 
-  std::string pixelTypes = m_ClassDescription->GetPixelTypes();
+  std::string pixelTypes = this->GetClassDescription()->GetPixelTypes();
   if ( pixelTypes == "BasicPixelIDTypeList" ||
        pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
        pixelTypes == "NonLabelPixelIDTypeList" )
@@ -632,9 +601,9 @@ void
 Slicer4PluginGenerator
 ::WriteEnumerationCode( std::ostream & os )
 {
-  for ( int i = 0; i < m_ClassDescription->GetNumberOfEnumerations(); ++i )
+  for ( int i = 0; i < this->GetClassDescription()->GetNumberOfEnumerations(); ++i )
     {
-    const Enumeration * enumeration = m_ClassDescription->GetEnumeration( i );
+    const Enumeration * enumeration = this->GetClassDescription()->GetEnumeration( i );
 
     os << "typedef enum {\n";
     for ( int j = 0; j < enumeration->GetNumberOfEnumerants(); ++j )
@@ -650,65 +619,3 @@ Slicer4PluginGenerator
     os << "} " << enumeration->GetName() << ";\n\n";
     }
 }
-
-int
-Slicer4PluginGenerator
-::GetNumberOfInputs()
-{
-  if ( !m_ClassDescription )
-    {
-    return 0;
-    }
-
-  int numberOfInputs = m_ClassDescription->GetNumberOfInputs();
-
-  // We assume filters need at least one input
-  if ( numberOfInputs < 1 ) numberOfInputs++;
-
-  return numberOfInputs;
-}
-
-std::string
-Slicer4PluginGenerator
-::SplitCAMLCaseString( const std::string & input )
-{
-  size_t inputSize = input.size();
-  std::string outputString( input.substr( 0, 1) );
-  bool previousCapital = true;
-  for ( size_t i = 1; i < inputSize; ++i )
-    {
-    if ( this->IsCapitalLetter( input[i] ) )
-      {
-      if ( !previousCapital )
-        {
-        outputString.append( " " );
-        }
-      previousCapital = true;
-      }
-    else
-      {
-      previousCapital = false;
-      }
-
-    outputString.append( input.substr( i, 1 ) );
-    }
-
-    return outputString;
-}
-
-std::string
-Slicer4PluginGenerator
-::SubstituteString( const std::string & toFind, const std::string & toReplace,
-                    const std::string & input )
-{
-  std::string output( input );
-  size_t nextPos = input.find( toFind );
-  while ( nextPos != std::string::npos )
-    {
-    output.replace( nextPos, toFind.size(), toReplace );
-    nextPos = output.find( toFind );
-    }
-
-  return output;
-}
-
