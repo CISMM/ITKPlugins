@@ -115,7 +115,6 @@ ParaView3PluginGenerator
 
     std::string typeName = member->GetTypeName();
     std::string xmlTypeName;
-    bool typeKnown = true;
     
     if ( this->IsIntVectorType( typeName ) || classDescription->IsEnumerationType( typeName ) )
       {
@@ -184,6 +183,242 @@ bool
 ParaView3PluginGenerator
 ::GenerateCode()
 {
+  bool success = this->GenerateHeaderCode();
+  if ( !success )
+    {
+    return false;
+    }
+
+  success = this->GenerateCXXCode();
+  if ( !success )
+    {
+    return false;
+    }
+
   return true;
 }
 
+bool
+ParaView3PluginGenerator
+::GenerateHeaderCode()
+{
+  // Useful variables
+  ClassDescription * classDescription = this->GetClassDescription();
+  std::string itkClassName( this->GetITKClassName() );
+  std::string vtkClassName( this->GetVTKClassName() );
+
+  // Open file for writing
+  std::string headerFilePath( this->GetPluginPath() );
+  char lastChar = *( this->GetPluginPath().rbegin() );
+  if ( lastChar != '/' || lastChar != '\\' )
+    {
+    // Add delimiter
+#ifdef WIN32
+    headerFilePath.append( "\\" );
+#else
+    headerFilePath.append( "/" );
+#endif
+    }
+  headerFilePath.append( vtkClassName );
+  headerFilePath.append( ".h" );
+
+  std::ofstream os( headerFilePath.c_str() );
+
+  os << "#ifndef __vtk" << classDescription->GetPluginName() << "_h_\n";
+  os << "#define __vtk" << classDescription->GetPluginName() << "_h_\n\n";
+
+  //os << "#include \"vtkITKImageFilter.h\"\n\n";
+
+  os << "class vtkImageExport;\n";
+  os << "class vtkImageImport;\n\n";
+
+  os << "class VTK_EXPORT " << vtkClassName << " : public vtkITKImageFilter\n";
+  os << "{\n";
+  os << "public:\n";
+  os << "  static " << vtkClassName << "* New();\n";
+  os << "  vtkTypeMacro(" << vtkClassName << ", vtkITKImageFilter);\n\n";
+
+  // Write members
+  for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
+    {
+    const MemberDescription * member = classDescription->GetMemberDescription( i );
+
+    if ( classDescription->IsEnumerationType( member->GetMemberName() ) )
+      {
+      // Write enumeration
+      }
+    else if ( member->GetNumberOfElements() == 1 )
+      {
+      os << "  // Set/get " << member->GetMemberName() << " variable\n";
+      os << "  vtkSetMacro(" << member->GetMemberName() << ", " 
+         << this->GetVTKTypeName( member->GetTypeName() ) << ");\n";
+      os << "  vtkGetMacro(" << member->GetMemberName() << ", "
+         << this->GetVTKTypeName( member->GetTypeName() ) << ");\n\n";
+      }
+    else
+      {
+      os << "  // Set/get " << member->GetMemberName() << " variable\n";
+      os << "  vtkSetVectorMacro(" << member->GetMemberName() << ", " 
+         << this->GetVTKTypeName( member->GetTypeName() )
+         << ", " << member->GetNumberOfElements() << ");\n";
+      os << "  vtkGetVectorMacro(" << member->GetMemberName() << ", "
+         << this->GetVTKTypeName( member->GetElementTypeName() )
+         << ", " << member->GetNumberOfElements() << ");\n\n";
+      }
+
+    }
+
+  // Protected members
+  os << "protected:\n";
+  os << "  " << vtkClassName << "\n";
+  os << "  virtual ~" << vtkClassName << "\n\n";
+
+  os << "  void PrintSelf(ostream& os, vtkIndent indent);\n\n";
+
+  // Private members
+  os << "private:\n";
+
+  os << "  " << vtkClassName << "(const " << vtkClassName << "&); // Purposely not implemented.\n";
+  os << "  void operator=(const " << vtkClassName << "&); // Purposely not implemented.\n\n";
+
+  for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
+    {
+    const MemberDescription * member = classDescription->GetMemberDescription( i );
+
+    if ( classDescription->IsEnumerationType( member->GetMemberName() ) )
+      {
+      // Write enumeration
+      }
+    else if ( member->GetNumberOfElements() == 1 )
+      {
+      os << "  " << this->GetVTKTypeName( member->GetTypeName() ) << " " << member->GetMemberName() << ";\n\n";
+      }
+    else
+      {
+      os << "  " << this->GetVTKTypeName( member->GetTypeName() ) << " " << member->GetMemberName() << "["
+         << member->GetNumberOfElements() << "];\n\n";
+      }
+    }
+
+  os << "};\n\n";
+
+  os << "#endif\n";
+
+  os.flush();
+  os.close();
+
+  return true;
+}
+
+bool
+ParaView3PluginGenerator
+::GenerateCXXCode()
+{
+  // Useful variables
+  const ClassDescription * classDescription = this->GetClassDescription();
+  std::string itkClassName( this->GetITKClassName() );
+  std::string vtkClassName( this->GetVTKClassName() );
+
+  // Open file for writing
+  std::string headerFilePath( this->GetPluginPath() );
+  char lastChar = *( this->GetPluginPath().rbegin() );
+  if ( lastChar != '/' || lastChar != '\\' )
+    {
+    // Add delimiter
+#ifdef WIN32
+    headerFilePath.append( "\\" );
+#else
+    headerFilePath.append( "/" );
+#endif
+    }
+  headerFilePath.append( vtkClassName );
+  headerFilePath.append( ".cxx" );
+
+  std::ofstream os( headerFilePath.c_str() );
+
+  os << "#include \"vtkITKImageFilter.h\"\n\n";
+
+  os << "#include <vtkObjectFactory.h>\n";
+  os << "#include <vtkImageExport.h>\n";
+  os << "#include <vtkImageImport.h>\n";
+  os << "#include <vtkImageData.h>\n";
+  os << "#include <vtkInformationVector.h>\n";
+  os << "#include <vtkInformation.h>\n\n";
+
+  os << "vtkStandardNewMacro(" << vtkClassName << ");\n\n";
+
+  // Constructor
+  os << vtkClassName << "::" << vtkClassName << "()\n";
+  os << "{\n";
+  os << "}\n\n";
+
+  // Destructor
+  os << vtkClassName << "::~" << vtkClassName << "()\n";
+  os << "{\n";
+  os << "}\n\n";
+
+  // PrintSelf method
+  os << "void " << vtkClassName << "::PrintSelf(ostream& os, vtkIndent indent)\n";
+  os << "{\n";
+  os << "this->Superclass::PrintSelf(os, indent);\n";
+  os << "}\n";
+
+  os.flush();
+  os.close();
+
+  return true;
+}
+
+std::string
+ParaView3PluginGenerator
+::GetITKClassName()
+{
+  std::string filterName( this->GetClassDescription()->GetPluginName() );
+  filterName.append( "ImageFilter" );
+
+  // Override the filter name if it is explicit in the JSON file
+  if ( this->GetClassDescription()->GetITKClassName() != "" )
+    {
+    filterName = this->GetClassDescription()->GetITKClassName();
+    }
+
+  return filterName;
+}
+
+
+std::string
+ParaView3PluginGenerator
+::GetVTKClassName()
+{
+  const ClassDescription * classDescription = this->GetClassDescription();
+  std::string vtkClassName( "vtkITK" );
+  vtkClassName.append( classDescription->GetPluginName() );
+  vtkClassName.append( "ImageFilter" );
+
+  return vtkClassName;
+}
+
+std::string
+ParaView3PluginGenerator
+::GetVTKTypeName( const std::string & typeName )
+{
+  if ( this->GetClassDescription()->IsEnumerationType( typeName ) )
+    {
+    return typeName;
+    }
+  else if ( this->IsBoolVectorType( typeName ) )
+    {
+    return std::string( "bool" );
+    }
+  else if ( this->IsIntVectorType( typeName ) )
+    {
+    return std::string( "int" );
+    }
+  else if ( this->IsDoubleVectorType( typeName ) )
+    {
+    return std::string( "double" );
+    }
+
+  std::cerr << "Unknown input typeName in GetVTKTypeName" << std::endl;
+  return std::string();
+}

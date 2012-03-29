@@ -34,6 +34,15 @@ private:
     return ( typeName == "double" || typeName == "std::vector<double>" );
   }
 
+  bool GenerateHeaderCode();
+
+  bool GenerateCXXCode();
+
+  std::string GetITKClassName();
+
+  std::string GetVTKClassName();
+
+  std::string GetVTKTypeName( const std::string & typeName );
 };
 
 #endif
