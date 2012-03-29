@@ -1,4 +1,5 @@
 include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/Slicer4" )
+include_directories( "/Users/quammen/dev/build/SimpleITK-build" )
 
 foreach( PLUGIN_NAME ${Plugin_JSON} )
 
