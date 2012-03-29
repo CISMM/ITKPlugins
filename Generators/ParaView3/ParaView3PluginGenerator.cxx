@@ -243,11 +243,23 @@ ParaView3PluginGenerator
     {
     const MemberDescription * member = classDescription->GetMemberDescription( i );
 
-    if ( classDescription->IsEnumerationType( member->GetMemberName() ) )
+    if ( classDescription->IsEnumerationType( member->GetTypeName() ) )
       {
       // Write enumeration
+      const Enumeration * enumeration = classDescription->GetEnumeration( member->GetTypeName() );
+      os << "  typedef enum {\n";
+      int j = 0;
+      for (j = 0; j < enumeration->GetNumberOfEnumerants()-1; ++j)
+        {
+        os << "    " << enumeration->GetEnumerantName( j ) << " = "
+           << enumeration->GetEnumerantValue(j ) << ",\n";
+        }
+      os << "    " << enumeration->GetEnumerantName( j ) << " = "
+         << enumeration->GetEnumerantValue( j ) << "\n";
+      os << "  } " << member->GetTypeName() << ";\n\n";
       }
-    else if ( member->GetNumberOfElements() == 1 )
+    
+    if ( member->GetNumberOfElements() == 1 )
       {
       os << "  // Set/get " << member->GetMemberName() << " variable\n";
       os << "  vtkSetMacro(" << member->GetMemberName() << ", " 
@@ -281,15 +293,15 @@ ParaView3PluginGenerator
   os << "  " << vtkClassName << "(const " << vtkClassName << "&); // Purposely not implemented.\n";
   os << "  void operator=(const " << vtkClassName << "&); // Purposely not implemented.\n\n";
 
+  // Run method declaration
+  os << "  template< class TInputImage >\n";
+  os << "  Run(TInput * input);\n\n";
+
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
     {
     const MemberDescription * member = classDescription->GetMemberDescription( i );
 
-    if ( classDescription->IsEnumerationType( member->GetMemberName() ) )
-      {
-      // Write enumeration
-      }
-    else if ( member->GetNumberOfElements() == 1 )
+    if ( member->GetNumberOfElements() == 1 )
       {
       os << "  " << this->GetVTKTypeName( member->GetTypeName() ) << " " << member->GetMemberName() << ";\n\n";
       }
@@ -338,6 +350,8 @@ ParaView3PluginGenerator
 
   os << "#include \"vtkITKImageFilter.h\"\n\n";
 
+  os << "#include <itk" << itkClassName << ".h>\n\n";
+
   os << "#include <vtkObjectFactory.h>\n";
   os << "#include <vtkImageExport.h>\n";
   os << "#include <vtkImageImport.h>\n";
@@ -357,10 +371,64 @@ ParaView3PluginGenerator
   os << "{\n";
   os << "}\n\n";
 
+  // Run method
+  os << "template< class TInputImage >\n";
+  os << "void " << vtkClassName << "::Run(TInputImage * input)\n";
+  os << "{\n";
+
+  // Instantiate the ITK filter
+  os << "  typedef itk::" << itkClassName << "< " << "> FilterType;\n";
+  os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
+
+  // Set the input
+  this->WriteSetInputCode( os );
+  os << "\n";
+
+  // Pass the member variable values from VTK to ITK
+  for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
+    {
+    const MemberDescription * member = classDescription->GetMemberDescription( i );
+    
+    if ( member->GetCustomITKCast() != "<undefined>" && !this->GetClassDescription()->IsEnumerationType( member->GetTypeName() ) )
+      {
+      std::string code( member->GetCustomITKCast() );
+      code = this->SubstituteString( "this->m_", "plugins", code );
+      code = this->SubstituteString( "m_", "plugins", code );
+
+      os << "  " << code << "\n";
+
+      continue;
+      }
+    if ( classDescription->IsEnumerationType( member->GetTypeName() ) )
+      {
+      os << "  filter->Set" << member->GetMemberName() << "(static_cast<typename FilterType::"
+         << member->GetTypeName() << ">(this->Get"
+         << member->GetMemberName() << "()));\n";
+      }
+    else
+      {
+      os << "  filter->Set" << member->GetMemberName() << "(this->Get"
+         << member->GetMemberName() << "());\n";
+      }
+    }
+
+  os << "\n" << "  filter->Update();\n\n";
+
+  // End the Run method
+  os << "}\n\n";
+
   // PrintSelf method
   os << "void " << vtkClassName << "::PrintSelf(ostream& os, vtkIndent indent)\n";
   os << "{\n";
-  os << "this->Superclass::PrintSelf(os, indent);\n";
+  os << "  this->Superclass::PrintSelf(os, indent);\n\n";
+
+  for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
+    {
+    const MemberDescription * member = classDescription->GetMemberDescription( i );
+    os << "  os << indent << " << "\"" << member->GetMemberName() << ":\" << this->"
+       << member->GetMemberName() << " << \"\\n\"\n";
+    }
+
   os << "}\n";
 
   os.flush();
@@ -421,4 +489,34 @@ ParaView3PluginGenerator
 
   std::cerr << "Unknown input typeName in GetVTKTypeName" << std::endl;
   return std::string();
+}
+
+void
+ParaView3PluginGenerator
+::WriteSetInputCode( std::ostream & os)
+{
+  if ( this->GetClassDescription()->GetCustomSetInput() == "<undefined>" )
+    {
+    for ( int i = 0; i < this->GetClassDescription()->GetNumberOfInputs(); ++i )
+      {
+      // First input gets special treatment to avoid
+      // "Input Primary is required but not set" exception
+      if ( i == 0 )
+        {
+        os << "  filter->SetInput( input" << i << "->GetOutput() );\n";
+        }
+      else
+        {
+        os << "  filter->SetInput( " << i << ", input" << i << "->GetOutput() );\n";
+        }
+      }
+    }
+  else
+    {
+    // Custom input code from the JSON file
+    std::string code( this->GetClassDescription()->GetCustomSetInput() );
+    code = this->SubstituteString( "this->m_", "plugins", code );
+    code = this->SubstituteString( "m_", "plugins", code );
+    os << "  " << code << "\n";
+    }
 }

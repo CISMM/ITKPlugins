@@ -43,6 +43,8 @@ private:
   std::string GetVTKClassName();
 
   std::string GetVTKTypeName( const std::string & typeName );
+
+  void WriteSetInputCode( std::ostream & os );
 };
 
 #endif
