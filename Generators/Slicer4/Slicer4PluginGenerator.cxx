@@ -308,6 +308,9 @@ Slicer4PluginGenerator
 
   os << "#include \"itkPluginUtilities.h\"\n\n";
 
+  os << "#include <tr1/functional>\n";
+  os << "#include <tr1/type_traits>\n";
+
   os << "#include <itkImageFileReader.h>\n";
   os << "#include <itkImageFileWriter.h>\n";
   os << "#include <itk" << filterName << ".h>\n\n";
@@ -317,11 +320,6 @@ Slicer4PluginGenerator
     {
     os << "#include <" << m_ClassDescription->GetIncludeFile( i ) << ">\n";
     }
-
-  // Need some SimpleITK heaaders
-  os << "#include <tr1/functional>\n";
-  os << "#include <tr1/type_traits>\n";
-  os << "#include <sitkConditional.h>\n\n";
 
   os << "#include \"" << m_ClassDescription->GetPluginName() << "CLP.h\"\n\n";
 
@@ -418,7 +416,10 @@ Slicer4PluginGenerator
   else
     {
     // Custom input code from the JSON file
-    os << "  " << m_ClassDescription->GetCustomSetInput() << "\n";
+    std::string code( m_ClassDescription->GetCustomSetInput() );
+    code = this->SubstituteString( "this->m_", "plugins", code );
+    code = this->SubstituteString( "m_", "plugins", code );
+    os << "  " << code << "\n";
     }
 
   // Set parameters
@@ -430,7 +431,12 @@ Slicer4PluginGenerator
     // own
     if ( member->GetCustomITKCast() != "<undefined>" && !m_ClassDescription->IsEnumerationType( member->GetTypeName() ) )
       {
-      os << "  " << member->GetCustomITKCast() << "\n";
+      std::string code( member->GetCustomITKCast() );
+      code = this->SubstituteString( "this->m_", "plugins", code );
+      code = this->SubstituteString( "m_", "plugins", code );
+
+      os << "  " << code << "\n";
+
       continue;
       }
 
