@@ -103,7 +103,7 @@ public:
   const Enumeration * GetEnumeration( int index ) const;
   const Enumeration * GetEnumeration( const std::string & name ) const;
   int GetNumberOfEnumerations() const;
-  bool IsEnumerationType( const std::string & name );
+  bool IsEnumerationType( const std::string & name ) const;
 
   void PrintSelf( std::ostream & os );
 

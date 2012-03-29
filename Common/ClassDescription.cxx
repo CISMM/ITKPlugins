@@ -105,7 +105,7 @@ ClassDescription
 
 bool
 ClassDescription
-::IsEnumerationType( const std::string & name )
+::IsEnumerationType( const std::string & name ) const
 {
   for ( int i = 0; i < this->GetNumberOfEnumerations(); ++i )
     {
