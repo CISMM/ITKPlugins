@@ -33,6 +33,22 @@ MemberDescription
 
 std::string
 MemberDescription
+::GetElementTypeName() const
+{
+  std::string defaultValue( this->GetDefaultValue() );
+  size_t pos1 = defaultValue.find( "<" );
+  size_t pos2 = defaultValue.find( ">" );
+
+  if ( pos1 != std::string::npos && pos2 != std::string::npos )
+    {
+    return defaultValue.substr( pos1+1, pos2-pos1-1 );
+    }
+
+  return std::string();
+}
+
+std::string
+MemberDescription
 ::GetElementDefaultValue() const
 {
   std::string defaultValue( this->GetDefaultValue() );

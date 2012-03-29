@@ -43,8 +43,9 @@ public:
     return m_CustomITKCast;
   }
 
+  // For vector member types
   int GetNumberOfElements() const;
-
+  std::string GetElementTypeName() const;
   std::string GetElementDefaultValue() const;
 
   void PrintSelf( std::ostream & os );
