@@ -82,7 +82,7 @@ ParaView3PluginGenerator
   os << "      <Documentation\n";
   os << "        long_help=\"\"\n"; // Should put detailed description here
   os << "        short_help=\""
-     << this->SubstituteString( "\n", "\\n", classDescription->GetBriefDescription() ) << "\"\n";
+     << this->SubstituteString( "\n", "\\n", classDescription->GetBriefDescription() ) << "\">\n";
   os << "      </Documentation>\n\n";
   
   // Write input descriptions
@@ -282,8 +282,8 @@ ParaView3PluginGenerator
 
   // Protected members
   os << "protected:\n";
-  os << "  " << vtkClassName << "\n";
-  os << "  virtual ~" << vtkClassName << "\n\n";
+  os << "  " << vtkClassName << "();\n";
+  os << "  virtual ~" << vtkClassName << "();\n\n";
 
   os << "  void PrintSelf(ostream& os, vtkIndent indent);\n\n";
 
@@ -348,7 +348,7 @@ ParaView3PluginGenerator
 
   std::ofstream os( headerFilePath.c_str() );
 
-  os << "#include \"vtkITKImageFilter.h\"\n\n";
+  //os << "#include \"vtkITKImageFilter.h\"\n\n";
 
   os << "#include <itk" << itkClassName << ".h>\n\n";
 
