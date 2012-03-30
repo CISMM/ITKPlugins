@@ -27,142 +27,142 @@ add_subdirectory( Utilities )
 # Generate plugin code
 # Code: #+ - Tested, compiles, #- Tested, fails
 
-set( Plugin_JSON
-  # These compile
-  #Abs
-  #AbsoluteValueDifference
-  #Acos
-  #Add
+set( WORKING_JSON
+  Abs
+  AbsoluteValueDifference
+  Acos
+  Add
   AddConstantTo
-  #And
-  #ApproximateSignedDistanceMap
-  #Asin
-  #Atan
-  #Atan2
-  #Bilateral
-  #BinaryContour
-  #BinaryMagnitude
-  #BinaryMinMaxCurvatureFlow
-  #BinaryProjection
-  #BinaryThinning
-  #BinaryThreshold
-  #BinomialBlur
-  #BoundedReciprocal
-  #CannyEdgeDetection
-  #CheckerBoard
-  #ComplexToImaginary
-  #ComplexToModulus
-  #ComplexToPhase
-  #ComplexToReal
-  #ConnectedComponent
-  #ConnectedThreshold
-  #Convolution
+  And
+  ApproximateSignedDistanceMap
+  Asin
+  Atan
+  Atan2
+  Bilateral
+  BinaryContour
+  BinaryMagnitude
+  BinaryMinMaxCurvatureFlow
+  BinaryProjection
+  BinaryThinning
+  BinaryThreshold
+  BinomialBlur
+  BoundedReciprocal
+  CannyEdgeDetection
+  CheckerBoard
+  ComplexToImaginary
+  ComplexToModulus
+  ComplexToPhase
+  ComplexToReal
+  ConnectedComponent
+  ConnectedThreshold
+  Convolution
   ConstantPad
-  #Cos
-  #Crop
+  Cos
+  Crop
   CurvatureAnisotropicDiffusion
   CurvatureFlow
-  #DanielssonDistanceMap
-  #Derivative
-  #DiscreteGaussian
-  #Divide
-  #DivideByConstant
-  #DivideConstantBy
-  #DoubleThreshold
-  #Exp
-  #ExpNegative
+  DanielssonDistanceMap
+  Derivative
+  DiscreteGaussian
+  Divide
+  DivideByConstant
+  DivideConstantBy
+  DoubleThreshold
+  Exp
+  ExpNegative
   FFTConvolution
-  #FFTShift
+  FFTShift
   Flip
-  #GradientAnisotropicDiffusion
-  #GradientMagnitudeRecursiveGaussian
-  #HausdorffDistance
-  #HConcave
-  #HConvex
-  ##-HistogramMatching
-  #HMaxima
-  #HMinima
-  #HuangThreshold
-  #IntensityWindowing
-  #IntermodesThreshold
+  GradientAnisotropicDiffusion
+  GradientMagnitudeRecursiveGaussian
+  HausdorffDistance
+  HConcave
+  HConvex
+  HMaxima
+  HMinima
+  HuangThreshold
+  IntensityWindowing
+  IntermodesThreshold
   InverseDeconvolution
-  #InverseFFT
-  #InvertIntensity
-  #IsoContourDistance
-  #IsoDataThreshold
-  #IsolatedWatershed
-  #KittlerIllingworthThreshold
-  #LabelContour
-  #LandweberDeconvolution
-  #Laplacian
-  #LaplacianRecursiveGaussian
-  #LaplacianSharpening
-  #LiThreshold
-  #Log
-  #Log10
-  #MagnitudeAndPhaseToComplex
-  #Mask
-  #MaskNegated
-  #Maximum
-  #MaximumEntropyThreshold
-  #MaximumProjection
-  #Mean
-  #MeanProjection
-  #MedianProjection
-  #Median
-  #MinMaxCurvatureFlow
-  #Minimum
-  #MinimumProjection
-  #MirrorPad
-  #Modulus
-  #MomentsThreshold
-  #Multiply
-  #MultiplyByConstant
-  #NeighborhoodConnected
-  #Noise
-  #Normalize
-  #NormalizeToConstant
-  #Not
-  #Or
-  #OtsuThreshold
-  #Pow
-  #PowToConstant
-  #ProjectedLandweberDeconvolution
-  #RealAndImaginaryToComplex
-  #RelabelComponent
-  #RenyiEntropyThreshold
-  #RescaleIntensity
-  #RichardsonLucyDeconvolution
-  #ScalarConnectedComponent
-  #ShanbhagThreshold
-  #ShiftScale
-  #Shrink
-  #Sigmoid
-  #SignedDanielssonDistanceMap
-  #SignedMaurerDistanceMap
-  #SimpleContourExtractor
-  #Sin
-  #SobelEdgeDetection
-  #Sqrt
-  #Square
-  #SquaredDifference
-  #StandardDeviationProjection
-  #Subtract
-  #SubtractConstantBy
-  #SumProjection
-  #TikhonovDeconvolution
-  #Tan
-  #Threshold
-  #TriangleThreshold
-  #VotingBinary
-  #VotingBinaryHoleFilling
-  #VotingBinaryIterativeHoleFilling
-  #WienerDeconvolution
-  #WrapPad
-  #Xor
-  #YenThreshold
-  #ZeroCrossingBasedEdgeDetection
+  InverseFFT
+  InvertIntensity
+  IsoContourDistance
+  IsoDataThreshold
+  IsolatedWatershed
+  KittlerIllingworthThreshold
+  LabelContour
+  LandweberDeconvolution
+  Laplacian
+  LaplacianRecursiveGaussian
+  LaplacianSharpening
+  LiThreshold
+  Log
+  Log10
+  MagnitudeAndPhaseToComplex
+  Mask
+  MaskNegated
+  Maximum
+  MaximumEntropyThreshold
+  MaximumProjection
+  Mean
+  MeanProjection
+  MedianProjection
+  Median
+  MinMaxCurvatureFlow
+  Minimum
+  MinimumProjection
+  MirrorPad
+  Modulus
+  MomentsThreshold
+  Multiply
+  MultiplyByConstant
+  NeighborhoodConnected
+  Noise
+  Normalize
+  NormalizeToConstant
+  Not
+  Or
+  OtsuThreshold
+  Pow
+  PowToConstant
+  ProjectedLandweberDeconvolution
+  RealAndImaginaryToComplex
+  RelabelComponent
+  RenyiEntropyThreshold
+  RescaleIntensity
+  RichardsonLucyDeconvolution
+  ScalarConnectedComponent
+  ShanbhagThreshold
+  ShiftScale
+  Shrink
+  Sigmoid
+  SignedDanielssonDistanceMap
+  SignedMaurerDistanceMap
+  SimpleContourExtractor
+  Sin
+  SobelEdgeDetection
+  Sqrt
+  Square
+  SquaredDifference
+  StandardDeviationProjection
+  Subtract
+  SubtractConstantBy
+  SumProjection
+  TikhonovDeconvolution
+  Tan
+  Threshold
+  TriangleThreshold
+  VotingBinary
+  VotingBinaryHoleFilling
+  VotingBinaryIterativeHoleFilling
+  WienerDeconvolution
+  WrapPad
+  Xor
+  YenThreshold
+  ZeroCrossingBasedEdgeDetection
+)
 
+  set( FAILING_JSON
   # These don't compile yet
   #-BinaryClosingByReconstruction
   #-BinaryDilate
@@ -192,6 +192,7 @@ set( Plugin_JSON
   #-GrayscaleGrindPeak
   #-GrayscaleMorphologicalClosing
   #-GrayscaleMorphologicalOpening
+  #-HistogramMatching
   #-LabelMapMask
   #-LabelMapOverlay
   #-LabelMapToBinary
@@ -216,6 +217,10 @@ set( Plugin_JSON
   #-VectorMagnitude
   #-WhiteTopHat - kernel filter
   #-ZeroCrossing - pixel type list
+)
+
+set( Plugin_JSON
+  ${WORKING_JSON}
 )
 
 if ( BUILD_SLICER4_PLUGINS )
