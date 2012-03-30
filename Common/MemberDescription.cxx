@@ -44,7 +44,7 @@ MemberDescription
     return defaultValue.substr( pos1+1, pos2-pos1-1 );
     }
 
-  return std::string();
+  return std::string( m_TypeName );
 }
 
 std::string
