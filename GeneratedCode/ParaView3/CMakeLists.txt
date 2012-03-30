@@ -27,9 +27,16 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
     "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
     )
 
-  add_paraview_plugin( "${PLUGIN_NAME}" "1.0"
+  add_paraview_plugin( ${PLUGIN_NAME} "1.0"
     SERVER_MANAGER_XML "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
-    SERVER_MANAGER_SOURCES "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
+    SERVER_MANAGER_SOURCES
+      "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
+      vtkITKImageFilter.h
+      vtkITKImageFilter.cxx
+    )
+
+  target_link_libraries( ${PLUGIN_NAME}
+    ${ITK_LIBRARIES}
     )
 
 endforeach()
