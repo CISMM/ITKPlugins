@@ -242,19 +242,16 @@ ParaView3PluginGenerator
 
   std::ofstream os( headerFilePath.c_str() );
 
-  os << "#ifndef __vtk" << classDescription->GetPluginName() << "_h_\n";
-  os << "#define __vtk" << classDescription->GetPluginName() << "_h_\n\n";
+  os << "#ifndef __" << vtkClassName << "_h_\n";
+  os << "#define __" << vtkClassName << "_h_\n\n";
 
-  os << "#include \"vtkITKImageFilter.h\"\n\n";
+  os << "#include <vtkImageAlgorithm.h>\n";
 
-  os << "class vtkImageExport;\n";
-  os << "class vtkImageImport;\n\n";
-
-  os << "class VTK_EXPORT " << vtkClassName << " : public vtkITKImageFilter\n";
+  os << "class VTK_EXPORT " << vtkClassName << " : public vtkImageAlgorithm\n";
   os << "{\n";
   os << "public:\n";
   os << "  static " << vtkClassName << "* New();\n";
-  os << "  vtkTypeMacro(" << vtkClassName << ", vtkITKImageFilter);\n\n";
+  os << "  vtkTypeMacro(" << vtkClassName << ", vtkImageAlgorithm);\n\n";
 
   // Write members
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -307,6 +304,10 @@ ParaView3PluginGenerator
 
   os << "  virtual int RequestUpdateExtent(vtkInformation *, vtkInformationVector **, vtkInformationVector *);\n\n";
 
+  os << "  virtual int RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **inputVector, vtkInformationVector * outputVector);\n\n";
+
+  os << "  int RequestData(vtkInformation * info, vtkInformationVector **inputVector, vtkInformationVector *outputVector);\n\n";
+
   os << "  void PrintSelf(ostream& os, vtkIndent indent);\n\n";
 
   // Private members
@@ -316,8 +317,19 @@ ParaView3PluginGenerator
   os << "  void operator=(const " << vtkClassName << "&); // Purposely not implemented.\n\n";
 
   // Run method declaration
-  os << "  template< class TInputImage >\n";
-  os << "  void Run(TInputImage * input);\n\n";
+  if ( classDescription->GetNumberOfInputs() == 1 )
+    {
+    os << "  template< class TInputPixel >\n";
+    os << "  void Run(TInputPixel *, vtkImageData * input, vtkImageData * output);\n\n";
+    }
+  else
+    {
+    os << "  template< class TInputPixel0, class TInputPixel1 >\n";
+    os << "  void Run(TInputPixel0 *, TInputPixel1 *, vtkImageData * input0, vtkImageData * input1, vtkImageData * output);\n\n";
+
+    os << "  template< class TInputPixel0 >\n";
+    os << "  void DispatchTwoInputs(TInputPixel0 *, vtkImageData * input0, vtkImageData * input1, vtkImageData * output);\n\n";
+    }
 
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
     {
@@ -386,12 +398,15 @@ ParaView3PluginGenerator
   os << "\n";
 
   os << "#include <vtkObjectFactory.h>\n";
-  os << "#include <vtkImageExport.h>\n";
-  os << "#include <vtkImageImport.h>\n";
   os << "#include <vtkImageData.h>\n";
   os << "#include <vtkInformationVector.h>\n";
   os << "#include <vtkInformation.h>\n";
   os << "#include <vtkStreamingDemandDrivenPipeline.h>\n\n";
+
+  os << "#include <itkImageToVTKImageFilter.h>\n";
+  os << "#include <itkVTKImageToImageFilter.h>\n\n";
+
+  os << "#include \"vtkReducedTypeTemplateMacro.h\"\n\n";
 
   os << "vtkStandardNewMacro(" << vtkClassName << ");\n\n";
 
@@ -403,7 +418,7 @@ ParaView3PluginGenerator
   os << "  this->SetNumberOfInputPorts(" << classDescription->GetNumberOfInputs() << ");\n";
   os << "  this->SetNumberOfOutputPorts(1);\n\n";
 
-  os << "  this->Init();\n";
+  //os << "  this->Init();\n";
 
   // Initialize default values
   for ( int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i )
@@ -452,7 +467,7 @@ ParaView3PluginGenerator
   os << "int " << vtkClassName << "::RequestUpdateExtent(\n";
   os << "  vtkInformation * vtkNotUsed(request),\n";
   os << "  vtkInformationVector **inputVector,\n";
-  os << "  vtkInformationVector *outputVector)\n";
+  os << "  vtkInformationVector * vtkNotUsed(outputVector))\n";
   os << "{\n";
 
   os << "  int inWExt[6];\n";
@@ -466,10 +481,10 @@ ParaView3PluginGenerator
 
   os << "return 1;\n";
 
-  os << "}\n";
+  os << "}\n\n";
 
   // FillInputPortInformation() method
-  os << "int " << vtkClassName << "::FillInputPortInformation(int port, vtkInformation *info)\n";
+  os << "int " << vtkClassName << "::FillInputPortInformation(int port, vtkInformation * info)\n";
   os << "{\n";
   os << "  info->Set(vtkAlgorithm::INPUT_REQUIRED_DATA_TYPE(), \"vtkImageData\");\n";
   os << "  info->Set(vtkAlgorithm::INPUT_IS_REPEATABLE(), 0);\n";
@@ -488,17 +503,72 @@ ParaView3PluginGenerator
   os << "  return 0;\n";
   os << "}\n\n";
 
+  os << "int " << vtkClassName << "::RequestInformation(vtkInformation *vtkNotUsed(request), vtkInformationVector **inputVector, vtkInformationVector *outputVector)\n";
+  os << "{\n";
+  os << "  double spacing[3];\n";
+  os << "  double origin[3];\n";
+  os << "  int wholeExt[6];\n\n";
+
+  os << "  vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);\n";
+  os << "  vtkInformation *outInfo = outputVector->GetInformationObject(0);\n\n";
+
+  os << "  inInfo->Get(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), wholeExt);\n";
+  os << "  inInfo->Get(vtkDataObject::SPACING(), spacing);\n";
+  os << "  inInfo->Get(vtkDataObject::ORIGIN(), origin);\n\n";
+
+  os << "  outInfo->Set(vtkStreamingDemandDrivenPipeline::WHOLE_EXTENT(), wholeExt, 6);\n";
+  os << "  outInfo->Set(vtkDataObject::SPACING(), spacing, 3);\n";
+  os << "  outInfo->Set(vtkDataObject::ORIGIN(), origin, 3);\n\n";
+
+  os << "  return 1;\n";
+  os << "}\n\n";
+
+  // RequestData() method
+  os << "int " << vtkClassName << "::RequestData(vtkInformation * vtkNotUsed(info), vtkInformationVector **inputVector, vtkInformationVector *outputVector)\n";
+  os << "{\n";
+
+  if ( classDescription->GetNumberOfInputs() == 1 )
+    {
+    os << "#include \"RunOneInput.h\"\n";
+    }
+  else
+    {
+    os << "#include \"RunTwoInputs.h\"\n";
+    }
+
+  os << "  return 1;\n";
+
+  os << "}\n\n";
+
+
+
   // Run method
-  os << "template< class TInputImage >\n";
-  os << "void " << vtkClassName << "::Run(TInputImage * input)\n";
+  if ( classDescription->GetNumberOfInputs() == 1 )
+    {
+    os << "template< class TInputPixel >\n";
+    os << "void " << vtkClassName << "::Run(TInputPixel *, vtkImageData * vtkInput, vtkImageData * output);\n\n";
+    }
+  else
+    {
+    // Insert a dispatch method for the two input typs
+    os << "template< class TInputPixel0 >\n";
+    os << "void " << vtkClassName << "::DispatchTwoInputs(TInputPixel0 *, vtkImageData * vtkInput0, vtkImageData * vtkInput1, vtkImageData * output)\n";
+    os << "{\n";
+    os << "#include \"DispatchTwoInputsBody.h\"\n";
+    os << "}\n\n";
+
+    os << "template< class TInputPixel, class TInputPixel1 >\n";
+    os << "void " << vtkClassName << "::Run(TInputPixel *, TInputPixel1 *, vtkImageData * vtkInput0, vtkImageData * vtkInput1, vtkImageData * output)\n";
+    }
+
   os << "{\n";
 
   // Instantiate the ITK filter
-  os << "  typedef TInputImage InputImageType;\n";
+  os << "  typedef itk::Image< TInputPixel, 3 > InputImageType;\n";
 
   for (int i = 1; i < classDescription->GetNumberOfInputs(); ++i)
     {
-    os << "  typedef TInputImage InputImageType" << i+1 << ";\n";
+    os << "  typedef itk::Image< TInputPixel" << i << ", 3 > InputImageType" << i << ";\n";
     }
 
   if ( this->GetClassDescription()->GetOutputPixelType() != "" )
@@ -509,7 +579,7 @@ ParaView3PluginGenerator
   else
     {
     // Standard pixel type
-    os << "  typedef TInputImage OutputImageType;\n\n";
+    os << "  typedef InputImageType OutputImageType;\n\n";
     }
 
   if ( this->GetClassDescription()->GetFilterType() != "" )
@@ -525,18 +595,30 @@ ParaView3PluginGenerator
   else
     {
     // Standard filter type declaration
-    os << "  typedef itk::" << itkClassName << "< ";
-    for ( int i = 0; i < this->GetNumberOfInputs(); ++i )
+    os << "  typedef itk::" << itkClassName << "< InputImageType, ";
+    for ( int i = 1; i < this->GetNumberOfInputs(); ++i )
       {
-      os << "InputImageType, ";
+      os << "InputImageType" << i << ", ";
       }
     os << " OutputImageType > FilterType;\n";
     }
 
   os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
 
+  // Set up the VTK-to-ITK connections
+  os << "  typedef itk::VTKImageToImageFilter< InputImageType > VTKToITKConnectorType0;\n";
+  os << "  typename VTKToITKConnectorType0::Pointer vtkToITKConnector0 = VTKToITKConnectorType0::New();\n";
+  os << "  vtkToITKConnector0->SetInput( vtkInput0 );\n\n";
+
+  for (int i = 1; i < classDescription->GetNumberOfInputs(); ++i)
+    {
+    os << "  typedef itk::VTKImageToImageFilter< InputImageType" << i << " > VTKToITKConnectorType" << i << ";\n";
+    os << "  typename VTKToITKConnectorType" << i << "::Pointer vtkToITKConnector" << i << " = VTKToITKConnectorType" << i << "::New();\n";
+    os << "  vtkToITKConnector" << i << "->SetInput( vtkInput" << i << " );\n\n";
+    }
+
   // Set the input
-  //this->WriteSetInputCode( os );
+  this->WriteSetInputCode( os );
   os << "\n";
 
   // Pass the member variable values from VTK to ITK
@@ -591,7 +673,23 @@ ParaView3PluginGenerator
       }
     }
 
-  os << "\n" << "  filter->Update();\n\n";
+  os << "\n";
+  os << "  try\n";
+  os << "    {\n";
+  os << "    filter->Update();\n";
+  os << "    }\n";
+  os << "  catch ( itk::ExceptionObject & except )\n";
+  os << "    {\n";
+  os << "    vtkErrorMacro( << except );\n";
+  os << "    }\n\n";
+
+  // Set up the glue between the ITK image and the VTK image.
+  os << "  typedef itk::ImageToVTKImageFilter< InputImageType > ITKToVTKConnectorType;\n";
+  os << "  typename ITKToVTKConnectorType::Pointer itkToVTKConnector = ITKToVTKConnectorType::New();\n";
+  os << "  itkToVTKConnector->SetInput( filter->GetOutput() );\n";
+  os << "  itkToVTKConnector->Update();\n\n";
+
+  os << "  output->ShallowCopy( itkToVTKConnector->GetOutput() );\n\n";
 
   // End the Run method
   os << "}\n\n";
@@ -674,6 +772,16 @@ void
 ParaView3PluginGenerator
 ::WriteSetInputCode( std::ostream & os)
 {
+  for ( int i = 0; i < this->GetClassDescription()->GetNumberOfInputs(); ++i )
+    {
+    os << "  InputImageType";
+    if ( i > 0 )
+      {
+      os << i;
+      }
+    os<< " * image" << i+1 << " = vtkToITKConnector" << i << "->GetOutput();\n";
+    }
+
   if ( this->GetClassDescription()->GetCustomSetInput() == "<undefined>" )
     {
     for ( int i = 0; i < this->GetClassDescription()->GetNumberOfInputs(); ++i )
@@ -682,17 +790,19 @@ ParaView3PluginGenerator
       // "Input Primary is required but not set" exception
       if ( i == 0 )
         {
-        os << "  filter->SetInput( input" << i << "->GetOutput() );\n";
+        os << "  filter->SetInput( image1 );\n";
         }
       else
         {
-        os << "  filter->SetInput( " << i << ", input" << i << "->GetOutput() );\n";
+        os << "  InputImageType" << i << " * image" << i << " = vtkToITKConnector" << i << "->GetOutput();\n";
+        os << "  filter->SetInput( " << i << ", image" << i << " );\n";
         }
       }
     }
   else
     {
     // Custom input code from the JSON file
+
     std::string code( this->GetClassDescription()->GetCustomSetInput() );
     code = this->SubstituteString( "this->m_", "plugins", code );
     code = this->SubstituteString( "m_", "plugins", code );
