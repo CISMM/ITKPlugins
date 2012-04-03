@@ -1,5 +1,6 @@
 include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/ParaView3" )
 include_directories( "/Users/quammen/dev/build/SimpleITK-build" )
+include_directories( ${ITK_INCLUDE_DIRS} )
 
 set( GENERATED_CODE_DIRECTORY "${ITKPlugins_BINARY_DIR}/GeneratedCode/ParaView3" )
 
@@ -16,7 +17,9 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
       "${ITKPlugins_BINARY_DIR}/bin/GenerateParaView3Plugin"
       "/Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json"
       "${GENERATED_CODE_DIRECTORY}"
-    DEPENDS GenerateParaView3Plugin
+    DEPENDS
+      GenerateParaView3Plugin
+      /Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json
     WORKING_DIRECTORY "${ITKPlugins_BINARY_DIR}"
     VERBATIM
     )
