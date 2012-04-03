@@ -91,6 +91,115 @@ PluginGenerator
   return output;
 }
 
+
+bool
+PluginGenerator
+::WritePixelTypeDefinitions( std::ostream & os )
+{
+  bool ucharType  = false;
+  bool charType   = false;
+  bool ushortType = false;
+  bool shortType  = false;
+  bool uintType   = false;
+  bool intType    = false;
+  bool ulongType  = false;
+  bool longType   = false;
+  bool floatType  = false;
+  bool doubleType = false;
+  bool complexFloatType  = false;
+  bool complexDoubleType = false;
+
+  std::string pixelTypes = this->GetClassDescription()->GetPixelTypes();
+  if ( pixelTypes == "BasicPixelIDTypeList" ||
+       pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
+       pixelTypes == "NonLabelPixelIDTypeList" )
+    {
+    ucharType  = true;
+    charType   = true;
+    ushortType = true;
+    shortType  = true;
+    uintType   = true;
+    intType    = true;
+    ulongType  = true;
+    longType   = true;
+    floatType  = true;
+    doubleType = true;
+    }
+  else if ( pixelTypes == "ComplexPixelIDTypeList" ||
+            pixelTypes == "typelist::Append<BasicPixelIDTypeList, ComplexPixelIDTypeList>::Type" ||
+            pixelTypes == "NonLabelPixelIDTypeList" )
+    {
+    complexFloatType  = true;
+    complexDoubleType = true;
+    }
+  else if ( pixelTypes == "IntegerPixelIDTypeList" )
+    {
+    ucharType  = true;
+    charType   = true;
+    ushortType = true;
+    shortType  = true;
+    uintType   = true;
+    intType    = true;
+    ulongType  = true;
+    longType   = true;
+    }
+  else if ( pixelTypes ==  "LabelPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'LabelPixelIDTypeList'" << std::endl;
+    return false;
+    }
+  else if ( pixelTypes == "NonLabelPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'NonLabelPixelIDTypeList'" << std::endl;
+    return false;
+    }
+  else if ( pixelTypes == "RealPixelIDTypeList" )
+    {
+    floatType  = true;
+    doubleType = true;
+    }
+  else if ( pixelTypes == "RealVectorPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'RealVectorPixelIDTypeList'" << std::endl;
+    return false;
+    }
+  else if ( pixelTypes == "ScalarPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'ScalarPixelIDTypeList'" << std::endl;
+    return false;
+    }
+  else if ( pixelTypes == "VectorPixelIDTypeList" )
+    {
+    std::cerr << "Unsupported pixel type list 'VectorPixelIDTypeList'" << std::endl;
+    return false;
+    }
+  else if ( pixelTypes == "typelist" )
+    {
+    std::cerr << "Unsupported pixel type list 'typelist'" << std::endl;
+    return false;
+    }
+  else
+    {
+    std::cerr << "Unrecognized pixel type list '" << pixelTypes << std::endl;
+    return false;
+    }
+
+  if ( ucharType )  os << "#define ITK_UCHAR_TYPE\n";
+  if ( charType )   os << "#define ITK_CHAR_TYPE\n";
+  if ( ushortType)  os << "#define ITK_USHORT_TYPE\n";
+  if ( shortType )  os << "#define ITK_SHORT_TYPE\n";
+  if ( uintType )   os << "#define ITK_UINT_TYPE\n";
+  if ( intType )    os << "#define ITK_INT_TYPE\n";
+  if ( ulongType )  os << "#define ITK_ULONG_TYPE\n";
+  if ( longType )   os << "#define ITK_LONG_TYPE\n";
+  if ( floatType )  os << "#define ITK_FLOAT_TYPE\n";
+  if ( doubleType ) os << "#define ITK_DOUBLE_TYPE\n";
+  if ( complexFloatType )  os << "#define ITK_COMPLEX_FLOAT_TYPE\n";
+  if ( complexDoubleType ) os << "#define ITK_COMPLEX_DOUBLE_TYPE\n";
+
+  return true;
+}
+
 int
 PluginGenerator
 ::GetNumberOfInputs()

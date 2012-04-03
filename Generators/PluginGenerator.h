@@ -33,6 +33,7 @@ protected:
   std::string SubstituteString( const std::string & toFind, const std::string & toReplace,
                                 const std::string & input );
 
+  bool WritePixelTypeDefinitions( std::ostream & os );
 
 private:
   ClassDescription * m_ClassDescription;
