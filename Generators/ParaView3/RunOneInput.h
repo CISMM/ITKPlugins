@@ -18,8 +18,6 @@ if (!output)
 
 switch ( input->GetScalarType() )
   {
-  //vtkReducedTypeTemplateMacro( Run( static_cast< VTK_TT *>( 0 ),
-  //input, output ); );
 #ifdef ITK_UCHAR_TYPE
   case VTK_UNSIGNED_CHAR:
     Run( static_cast< unsigned char * >( 0 ), input, output );
