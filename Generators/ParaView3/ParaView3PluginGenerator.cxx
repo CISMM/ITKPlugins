@@ -326,9 +326,6 @@ ParaView3PluginGenerator
     {
     os << "  template< class TInputPixel0, class TInputPixel1 >\n";
     os << "  void Run(TInputPixel0 *, TInputPixel1 *, vtkImageData * input0, vtkImageData * input1, vtkImageData * output);\n\n";
-
-    os << "  template< class TInputPixel0 >\n";
-    os << "  void DispatchTwoInputs(TInputPixel0 *, vtkImageData * input0, vtkImageData * input1, vtkImageData * output);\n\n";
     }
 
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -406,7 +403,8 @@ ParaView3PluginGenerator
   os << "#include <itkImageToVTKImageFilter.h>\n";
   os << "#include <itkVTKImageToImageFilter.h>\n\n";
 
-  os << "#include \"vtkReducedTypeTemplateMacro.h\"\n\n";
+  this->WritePixelTypeDefinitions( os );
+  os << "\n";
 
   os << "vtkStandardNewMacro(" << vtkClassName << ");\n\n";
 
@@ -546,17 +544,10 @@ ParaView3PluginGenerator
   if ( classDescription->GetNumberOfInputs() == 1 )
     {
     os << "template< class TInputPixel >\n";
-    os << "void " << vtkClassName << "::Run(TInputPixel *, vtkImageData * vtkInput, vtkImageData * output);\n\n";
+    os << "void " << vtkClassName << "::Run(TInputPixel *, vtkImageData * vtkInput0, vtkImageData * output)\n";
     }
   else
     {
-    // Insert a dispatch method for the two input typs
-    os << "template< class TInputPixel0 >\n";
-    os << "void " << vtkClassName << "::DispatchTwoInputs(TInputPixel0 *, vtkImageData * vtkInput0, vtkImageData * vtkInput1, vtkImageData * output)\n";
-    os << "{\n";
-    os << "#include \"DispatchTwoInputsBody.h\"\n";
-    os << "}\n\n";
-
     os << "template< class TInputPixel, class TInputPixel1 >\n";
     os << "void " << vtkClassName << "::Run(TInputPixel *, TInputPixel1 *, vtkImageData * vtkInput0, vtkImageData * vtkInput1, vtkImageData * output)\n";
     }
@@ -568,7 +559,7 @@ ParaView3PluginGenerator
 
   for (int i = 1; i < classDescription->GetNumberOfInputs(); ++i)
     {
-    os << "  typedef itk::Image< TInputPixel" << i << ", 3 > InputImageType" << i << ";\n";
+    os << "  typedef InputImageType InputImageType" << i+1 << ";\n";
     }
 
   if ( this->GetClassDescription()->GetOutputPixelType() != "" )
@@ -598,7 +589,7 @@ ParaView3PluginGenerator
     os << "  typedef itk::" << itkClassName << "< InputImageType, ";
     for ( int i = 1; i < this->GetNumberOfInputs(); ++i )
       {
-      os << "InputImageType" << i << ", ";
+      os << "InputImageType" << i+1 << ", ";
       }
     os << " OutputImageType > FilterType;\n";
     }
@@ -612,7 +603,7 @@ ParaView3PluginGenerator
 
   for (int i = 1; i < classDescription->GetNumberOfInputs(); ++i)
     {
-    os << "  typedef itk::VTKImageToImageFilter< InputImageType" << i << " > VTKToITKConnectorType" << i << ";\n";
+    os << "  typedef itk::VTKImageToImageFilter< InputImageType" << i+1 << " > VTKToITKConnectorType" << i << ";\n";
     os << "  typename VTKToITKConnectorType" << i << "::Pointer vtkToITKConnector" << i << " = VTKToITKConnectorType" << i << "::New();\n";
     os << "  vtkToITKConnector" << i << "->SetInput( vtkInput" << i << " );\n\n";
     }
@@ -633,14 +624,34 @@ ParaView3PluginGenerator
       code = this->SubstituteString( "m_", "", code );
 
       os << "  " << code << "\n";
-
-      continue;
       }
-    if ( classDescription->IsEnumerationType( member->GetTypeName() ) )
+    else if ( classDescription->IsEnumerationType( member->GetTypeName() ) )
       {
-      os << "  filter->Set" << member->GetMemberName() << "(static_cast<typename FilterType::"
-         << member->GetTypeName() << ">(this->Get"
-         << member->GetMemberName() << "()));\n";
+      if ( member->GetCustomITKCast() == "<undefined>" )
+        {
+        os << "  filter->Set" << member->GetMemberName() << "(static_cast<typename FilterType::"
+           << member->GetTypeName() << ">(this->Get"
+           << member->GetMemberName() << "()));\n";
+        }
+      else
+        {
+        std::string code( member->GetCustomITKCast() );
+        code = this->SubstituteString( "this->m_", "", code );
+        code = this->SubstituteString( "m_", "", code );
+
+        os << "  " << code << "\n";
+        }
+      }
+    else if ( member->GetTypeName().find( "vector" ) != std::string::npos )
+      {
+      os << "  " << member->GetITKType() << " tmp" << member->GetMemberName() << ";\n";
+
+      for ( int i = 0; i < 3; ++i )
+        {
+        os << "  tmp" << member->GetMemberName() << "[" << i << "] = this->Get" << member->GetMemberName() << "()[" << i << "];\n";
+        }
+      os << "  filter->Set" << member->GetMemberName() << "( tmp" << member->GetMemberName()
+         << " );\n";
       }
     else
       {
@@ -684,7 +695,7 @@ ParaView3PluginGenerator
   os << "    }\n\n";
 
   // Set up the glue between the ITK image and the VTK image.
-  os << "  typedef itk::ImageToVTKImageFilter< InputImageType > ITKToVTKConnectorType;\n";
+  os << "  typedef itk::ImageToVTKImageFilter< OutputImageType > ITKToVTKConnectorType;\n";
   os << "  typename ITKToVTKConnectorType::Pointer itkToVTKConnector = ITKToVTKConnectorType::New();\n";
   os << "  itkToVTKConnector->SetInput( filter->GetOutput() );\n";
   os << "  itkToVTKConnector->Update();\n\n";
@@ -777,26 +788,22 @@ ParaView3PluginGenerator
     os << "  InputImageType";
     if ( i > 0 )
       {
-      os << i;
+      os << i+1;
       }
     os<< " * image" << i+1 << " = vtkToITKConnector" << i << "->GetOutput();\n";
     }
 
   if ( this->GetClassDescription()->GetCustomSetInput() == "<undefined>" )
     {
-    for ( int i = 0; i < this->GetClassDescription()->GetNumberOfInputs(); ++i )
+    if ( this->GetClassDescription()->GetNumberOfInputs() == 1 )
       {
-      // First input gets special treatment to avoid
-      // "Input Primary is required but not set" exception
-      if ( i == 0 )
-        {
-        os << "  filter->SetInput( image1 );\n";
-        }
-      else
-        {
-        os << "  InputImageType" << i << " * image" << i << " = vtkToITKConnector" << i << "->GetOutput();\n";
-        os << "  filter->SetInput( " << i << ", image" << i << " );\n";
-        }
+      os << "  filter->SetInput( image1 );\n";
+      }
+    else
+      {
+      // Assume at most two inputs
+      os << "  filter->SetInput1( image1 );\n";
+      os << "  filter->SetInput2( image2 );\n";
       }
     }
   else
