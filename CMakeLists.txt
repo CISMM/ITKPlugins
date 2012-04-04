@@ -98,7 +98,6 @@ set( WORKING_JSON
   LiThreshold
   Log
   Log10
-  MagnitudeAndPhaseToComplex
   Mask
   MaskNegated
   Maximum
@@ -126,7 +125,6 @@ set( WORKING_JSON
   Pow
   PowToConstant
   ProjectedLandweberDeconvolution
-  RealAndImaginaryToComplex
   RelabelComponent
   RenyiEntropyThreshold
   RescaleIntensity
@@ -200,11 +198,13 @@ set( WORKING_JSON
   #-LabelMapToRGB
   #-LabelOverlay
   #-LabelToRGB
+  #-MagnitudeAndPhaseToComplex
   #-MorphologicalGradient - kernel image
   #-N4BiasFieldCorrection
   #-OpeningByReconstruction
   #-Paste
   #-PermuteAxes - CLP generation fails
+  #-RealAndImaginaryToComplex
   #-RecursiveGaussian
   #-RegionOfInterest
   #-Resample - malformed XML
