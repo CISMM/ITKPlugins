@@ -34,8 +34,6 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
     SERVER_MANAGER_XML "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
     SERVER_MANAGER_SOURCES
       "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
-      vtkITKImageFilter.h
-      vtkITKImageFilter.cxx
     )
 
   target_link_libraries( ${PLUGIN_NAME}
