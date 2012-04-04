@@ -89,7 +89,23 @@ ParaView3PluginGenerator
   for (int i = 0; i < this->GetNumberOfInputs(); ++i)
     {
     os << "      <InputProperty\n";
-    os << "         name=\"Input" << i+1 << "\"\n";
+
+    if ( i == 0 )
+      {
+      if ( this->GetNumberOfInputs() == 1 )
+        {
+        os << "         name=\"Input\"\n";
+        }
+      else
+        {
+        os << "         name=\"First Input\"\n";
+        }
+      }
+    else
+      {
+      os << "         name=\"Second Input\"\n";
+      }
+
     os << "         port_index=\"" << i << "\"\n";
     os << "         command=\"SetInputConnection\">\n";
 
@@ -684,7 +700,6 @@ ParaView3PluginGenerator
       }
     }
 
-  os << "\n";
   os << "  try\n";
   os << "    {\n";
   os << "    filter->Update();\n";
@@ -700,7 +715,7 @@ ParaView3PluginGenerator
   os << "  itkToVTKConnector->SetInput( filter->GetOutput() );\n";
   os << "  itkToVTKConnector->Update();\n\n";
 
-  os << "  output->ShallowCopy( itkToVTKConnector->GetOutput() );\n\n";
+  os << "  output->DeepCopy( itkToVTKConnector->GetOutput() );\n\n";
 
   // End the Run method
   os << "}\n\n";
