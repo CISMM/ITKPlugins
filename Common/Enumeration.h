@@ -34,6 +34,17 @@ public:
     return m_Enumerants[index].second;
   }
 
+  int GetEnumerantValueForName( const std::string & name ) const {
+    for ( size_t i = 0; i < m_Enumerants.size(); ++i )
+      {
+      if ( m_Enumerants[i].first == name )
+        return m_Enumerants[i].second;
+      }
+
+    // Not found
+    return -1;
+  }
+
   void PrintSelf( std::ostream & os );
 
 protected:
