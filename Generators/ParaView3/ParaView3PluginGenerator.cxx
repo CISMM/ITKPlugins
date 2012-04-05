@@ -165,6 +165,11 @@ ParaView3PluginGenerator
         {
         os << "0";
         }
+      else if ( classDescription->IsEnumerationType( member->GetTypeName() ) )
+        {
+        const Enumeration * enumeration = classDescription->GetEnumeration( member->GetTypeName() );
+        os << enumeration->GetEnumerantValueForName( member->GetDefaultValue() );
+        }
       else
         {
         os << elementDefaultValue;
@@ -274,11 +279,11 @@ ParaView3PluginGenerator
     {
     const MemberDescription * member = classDescription->GetMemberDescription( i );
 
-    if ( classDescription->IsEnumerationType( member->GetTypeName() ) )
+    const Enumeration * enumeration = classDescription->GetEnumeration( member->GetTypeName() );
+    if ( enumeration )
       {
       // Write enumeration
-      const Enumeration * enumeration = classDescription->GetEnumeration( member->GetTypeName() );
-      os << "  typedef enum {\n";
+      os << "  enum {\n";
       int j = 0;
       for (j = 0; j < enumeration->GetNumberOfEnumerants()-1; ++j)
         {
@@ -287,16 +292,30 @@ ParaView3PluginGenerator
         }
       os << "    " << enumeration->GetEnumerantName( j ) << " = "
          << enumeration->GetEnumerantValue( j ) << "\n";
-      os << "  } " << member->GetTypeName() << ";\n\n";
+      os << "  };\n\n";
       }
     
     if ( member->GetNumberOfElements() == 1 )
       {
       os << "  // Set/get " << member->GetMemberName() << " variable\n";
-      os << "  vtkSetMacro(" << member->GetMemberName() << ", " 
-         << this->GetVTKTypeName( member->GetTypeName() ) << ");\n";
-      os << "  vtkGetMacro(" << member->GetMemberName() << ", "
-         << this->GetVTKTypeName( member->GetTypeName() ) << ");\n\n";
+      os << "  vtkSetMacro(" << member->GetMemberName() << ", ";
+      if ( enumeration)
+        {
+        os << "int);\n";
+        }
+      else
+        {
+        os << this->GetVTKTypeName( member->GetTypeName() ) << ");\n";
+        }
+      os << "  vtkGetMacro(" << member->GetMemberName() << ", ";
+      if ( enumeration )
+        {
+        os << "int);\n\n";
+        }
+      else
+        {
+        os << this->GetVTKTypeName( member->GetTypeName() ) <<");\n\n";
+        }
       }
     else
       {
@@ -336,12 +355,12 @@ ParaView3PluginGenerator
   if ( classDescription->GetNumberOfInputs() == 1 )
     {
     os << "  template< class TInputPixel >\n";
-    os << "  void Run(TInputPixel *, vtkImageData * input, vtkImageData * output);\n\n";
+    os << "  bool Run(TInputPixel *, vtkImageData * input, vtkImageData * output);\n\n";
     }
   else
     {
     os << "  template< class TInputPixel0, class TInputPixel1 >\n";
-    os << "  void Run(TInputPixel0 *, TInputPixel1 *, vtkImageData * input0, vtkImageData * input1, vtkImageData * output);\n\n";
+    os << "  bool Run(TInputPixel0 *, TInputPixel1 *, vtkImageData * input0, vtkImageData * input1, vtkImageData * output);\n\n";
     }
 
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -350,7 +369,14 @@ ParaView3PluginGenerator
 
     if ( member->GetNumberOfElements() == 1 )
       {
-      os << "  " << this->GetVTKTypeName( member->GetTypeName() ) << " " << member->GetMemberName() << ";\n\n";
+      if ( classDescription->IsEnumerationType( member->GetTypeName() ) )
+        {
+        os << "  int " << member->GetMemberName() << ";\n\n";
+        }
+      else
+        {
+        os << "  " << this->GetVTKTypeName( member->GetTypeName() ) << " " << member->GetMemberName() << ";\n\n";
+        }
       }
     else
       {
@@ -493,7 +519,7 @@ ParaView3PluginGenerator
     os << "  inInfo" << i << "->Set(vtkStreamingDemandDrivenPipeline::UPDATE_EXTENT(), inWExt, 6);\n\n";
     }
 
-  os << "return 1;\n";
+  os << "  return 1;\n";
 
   os << "}\n\n";
 
@@ -550,7 +576,7 @@ ParaView3PluginGenerator
     os << "#include \"RunTwoInputs.h\"\n";
     }
 
-  os << "  return 1;\n";
+  os << "  return (success ? 1 : 0);\n";
 
   os << "}\n\n";
 
@@ -560,12 +586,12 @@ ParaView3PluginGenerator
   if ( classDescription->GetNumberOfInputs() == 1 )
     {
     os << "template< class TInputPixel >\n";
-    os << "void " << vtkClassName << "::Run(TInputPixel *, vtkImageData * vtkInput0, vtkImageData * output)\n";
+    os << "bool " << vtkClassName << "::Run(TInputPixel *, vtkImageData * vtkInput0, vtkImageData * output)\n";
     }
   else
     {
     os << "template< class TInputPixel, class TInputPixel1 >\n";
-    os << "void " << vtkClassName << "::Run(TInputPixel *, TInputPixel1 *, vtkImageData * vtkInput0, vtkImageData * vtkInput1, vtkImageData * output)\n";
+    os << "bool " << vtkClassName << "::Run(TInputPixel *, TInputPixel1 *, vtkImageData * vtkInput0, vtkImageData * vtkInput1, vtkImageData * output)\n";
     }
 
   os << "{\n";
@@ -613,15 +639,28 @@ ParaView3PluginGenerator
   os << "  typename FilterType::Pointer filter = FilterType::New();\n\n";
 
   // Set up the VTK-to-ITK connections
-  os << "  typedef itk::VTKImageToImageFilter< InputImageType > VTKToITKConnectorType0;\n";
-  os << "  typename VTKToITKConnectorType0::Pointer vtkToITKConnector0 = VTKToITKConnectorType0::New();\n";
-  os << "  vtkToITKConnector0->SetInput( vtkInput0 );\n\n";
-
-  for (int i = 1; i < classDescription->GetNumberOfInputs(); ++i)
+  for (int i = 0; i < classDescription->GetNumberOfInputs(); ++i)
     {
-    os << "  typedef itk::VTKImageToImageFilter< InputImageType" << i+1 << " > VTKToITKConnectorType" << i << ";\n";
+    //os << "  typedef itk::VTKImageToImageFilter< InputImageType" << i+1 << " > VTKToITKConnectorType" << i << ";\n";
+    //os << "  typename VTKToITKConnectorType" << i << "::Pointer vtkToITKConnector" << i << " = VTKToITKConnectorType" << i << "::New();\n";
+    //os << "  vtkToITKConnector" << i << "->SetInput( vtkInput" << i << " );\n\n";
+    os << "  typedef itk::VTKImageToImageFilter< InputImageType";
+    if ( i > 0 )
+      {
+      os << i+1;
+      }
+    os << " > VTKToITKConnectorType" << i << ";\n";
     os << "  typename VTKToITKConnectorType" << i << "::Pointer vtkToITKConnector" << i << " = VTKToITKConnectorType" << i << "::New();\n";
-    os << "  vtkToITKConnector" << i << "->SetInput( vtkInput" << i << " );\n\n";
+    os << "  vtkToITKConnector" << i << "->SetInput( vtkInput" << i << " );\n";
+    os << "  try\n";
+    os << "    {\n";
+    os << "    vtkToITKConnector" << i << "->Update();\n";
+    os << "    }\n";
+    os << "  catch ( itk::ExceptionObject & except )\n";
+    os << "    {\n";
+    os << "    vtkErrorMacro( << except );\n";
+    os << "    return false;\n";
+    os << "    }\n\n";
     }
 
   // Set the input
@@ -707,6 +746,7 @@ ParaView3PluginGenerator
   os << "  catch ( itk::ExceptionObject & except )\n";
   os << "    {\n";
   os << "    vtkErrorMacro( << except );\n";
+  os << "    return false;\n";
   os << "    }\n\n";
 
   // Set up the glue between the ITK image and the VTK image.
@@ -718,6 +758,7 @@ ParaView3PluginGenerator
   os << "  output->DeepCopy( itkToVTKConnector->GetOutput() );\n\n";
 
   // End the Run method
+  os << "  return true;\n";
   os << "}\n\n";
 
   // PrintSelf method
