@@ -16,61 +16,64 @@ if (!output)
   return 0;
   }
 
+bool success = true;
+
 switch ( input->GetScalarType() )
   {
 #ifdef ITK_UCHAR_TYPE
   case VTK_UNSIGNED_CHAR:
-    Run( static_cast< unsigned char * >( 0 ), input, output );
+    success = Run( static_cast< unsigned char * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_CHAR_TYPE
   case VTK_CHAR:
   case VTK_SIGNED_CHAR:
-    Run( static_cast< char * >( 0 ), input, output );
+    success = Run( static_cast< char * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_USHORT_TYPE
   case VTK_UNSIGNED_SHORT:
-    Run( static_cast< unsigned short * >( 0 ), input, output );
+    success = Run( static_cast< unsigned short * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_SHORT_TYPE
   case VTK_SHORT:
-    Run( static_cast< short * >( 0 ), input, output );
+    success = Run( static_cast< short * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_UINT_TYPE
   case VTK_UNSIGNED_INT:
-    Run( static_cast< unsigned int * >( 0 ), input, output );
+    success = Run( static_cast< unsigned int * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_INT_TYPE
   case VTK_INT:
-    Run( static_cast< int * >( 0 ), input, output );
+    success = Run( static_cast< int * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_ULONG_TYPE
   case VTK_UNSIGNED_LONG:
-    Run( static_cast< unsigned long * >( 0 ), input, output );
+    success = Run( static_cast< unsigned long * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_LONG_TYPE
   case VTK_LONG:
-    Run( static_cast< long * >( 0 ), input, output );
+    success = Run( static_cast< long * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_FLOAT_TYPE
   case VTK_FLOAT:
-    Run( static_cast< float * >( 0 ), input, output );
+    success = Run( static_cast< float * >( 0 ), input, output );
     break;
 #endif
 #ifdef ITK_DOUBLE_TYPE
-  case VTK_DOUBLE:
-    Run( static_cast< double * >( 0 ), input, output );
+   case VTK_DOUBLE:
+    success = Run( static_cast< double * >( 0 ), input, output );
     break;
 #endif
 
   default:
     vtkErrorMacro( "Unknown pixel type encountered" );
+    success = false;
     break;
   }

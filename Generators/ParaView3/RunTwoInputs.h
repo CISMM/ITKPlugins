@@ -93,5 +93,6 @@ switch ( input0->GetScalarType() )
 
   default:
     vtkErrorMacro( "Unknown pixel type encountered in input0" );
+    success = false;
     break;
   }
