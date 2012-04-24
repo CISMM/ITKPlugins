@@ -620,18 +620,13 @@ ParaView3PluginGenerator
       {
       std::cerr << "Could not find file RunOneInput.h" << std::endl;
       }
-    //os << "#include \"RunOneInput.h\"\n";
     }
   else
     {
-#if 1
     if ( !this->InsertFile( os, ITKPlugins_SOURCE_DIR "/Generators/ParaView3/RunTwoInputs.h" ) )
       {
       std::cerr << "Could not find file RunTwoInputs.h" << std::endl;
       }
-#else
-    os << "#include \"RunTwoInputs.h\"\n";
-#endif
     }
 
   os << "  return (success ? 1 : 0);\n";
