@@ -1,11 +1,13 @@
 vtkInformation *inInfo = inputVector[0]->GetInformationObject(0);
-vtkImageData *input = vtkImageData::SafeDownCast
+vtkImageData *originalInput = vtkImageData::SafeDownCast
   (inInfo->Get(vtkDataObject::DATA_OBJECT()));
-if (!input)
+if (!originalInput)
   {
   vtkErrorMacro("Input is not of type vtkImageData");
   return 0;
   }
+
+vtkImageData *input = originalInput;
 
 vtkInformation *outInfo = outputVector->GetInformationObject(0);
 vtkImageData *output = vtkImageData::SafeDownCast
@@ -16,9 +18,12 @@ if (!output)
   return 0;
   }
 
-bool success = true;
+// This probably isn't the way to do this properly, but it works
+const char* activeScalarName = this->GetInputArrayToProcess(0, input)->GetName();
+input->GetPointData()->SetActiveScalars( activeScalarName );
 
-switch ( input->GetScalarType() )
+bool success = true;
+switch( input->GetScalarType() )
   {
 #ifdef ITK_UCHAR_TYPE
   case VTK_UNSIGNED_CHAR:

@@ -25,6 +25,12 @@ if (!output)
   return 0;
   }
 
+// This probably isn't the way to do this properly, but it works
+const char* activeScalarName0 = this->GetInputArrayToProcess(0, input0)->GetName();
+input0->GetPointData()->SetActiveScalars( activeScalarName0 );
+const char* activeScalarName1 = this->GetInputArrayToProcess(0, input1)->GetName();
+input1->GetPointData()->SetActiveScalars( activeScalarName1 );
+
 bool success = true;
 
 switch ( input0->GetScalarType() )
