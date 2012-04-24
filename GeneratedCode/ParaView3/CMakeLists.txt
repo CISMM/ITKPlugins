@@ -1,6 +1,6 @@
 include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/ParaView3" )
 include_directories( "${SimpleITK_DIR}" )
-include_directories( "${ITK_INCLUDE_DIRS}" )
+include_directories( ${ITK_INCLUDE_DIRS} )
 
 set( GENERATED_CODE_DIRECTORY "${ITKPlugins_BINARY_DIR}/GeneratedCode/ParaView3" )
 
