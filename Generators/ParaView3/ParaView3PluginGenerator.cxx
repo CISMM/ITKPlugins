@@ -90,21 +90,12 @@ ParaView3PluginGenerator
     {
     os << "      <InputProperty\n";
 
-    if ( i == 0 )
+    os << "          name=\"Input";
+    if ( this->GetNumberOfInputs() > 1 )
       {
-      if ( this->GetNumberOfInputs() == 1 )
-        {
-        os << "         name=\"Input\"\n";
-        }
-      else
-        {
-        os << "         name=\"First Input\"\n";
-        }
+      os << i+1;
       }
-    else
-      {
-      os << "         name=\"Second Input\"\n";
-      }
+    os << "\"\n";
 
     os << "         port_index=\"" << i << "\"\n";
     os << "         command=\"SetInputConnection\">\n";
@@ -118,11 +109,52 @@ ParaView3PluginGenerator
     os << "          <DataType value=\"vtkImageData\"/>\n";
     os << "        </DataTypeDomain>\n";
 
+    os << "        <InputArrayDomain name=\"input_array" << i+1 << "\"\n";
+    os << "                          attribute_type=\"point\"\n";
+    os << "                          number_of_components=\"1\"/>\n";
+
     os << "        <Documentation>\n";
     os << "          Set input image " << i+1 << "\n";
     os << "        </Documentation>\n";
 
     os << "      </InputProperty>\n\n";
+    }
+
+  // Give user the choice of which scalar to use from the input images
+  for (int i = 0; i < this->GetNumberOfInputs(); ++i)
+    {
+    os << "      <StringVectorProperty\n";
+    os << "          name=\"SelectInputScalars" << i+1 << "\"\n";
+    os << "          command=\"SetInputArrayToProcess\"\n";
+    os << "          number_of_elements=\"5\"\n";
+    os << "          element_types=\"0 0 0 0 2\"\n";
+    os << "          animateable=\"0\"\n";
+    os << "          label=\"Scalar to Process";
+    if ( this->GetNumberOfInputs() > 1 )
+      {
+      os << " from Input " << i+1;
+      }
+    os << "\">\n";
+    os << "        <ArrayListDomain\n";
+    os << "           name=\"fieldName\"\n";
+    os << "           attribute_type=\"Scalars\"\n";
+    os << "           input_domain_name=\"input_array" << i+1 << "\">\n";
+    os << "          <RequiredProperties>\n";
+    os << "            <Property name=\"Input";
+    if ( this->GetNumberOfInputs() > 1 )
+      {
+      os << i+1;
+      }
+    os << "\" function=\"Input\"/>\n";
+    os << "          </RequiredProperties>\n";
+    os << "        </ArrayListDomain>\n";
+    os << "        <Documentation>Set active scalar field for input";
+    if ( this->GetNumberOfInputs() > 1 )
+      {
+      os << i+1;
+      }
+    os << "</Documentation>\n";
+    os << "      </StringVectorProperty>\n\n";
     }
 
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -274,6 +306,10 @@ ParaView3PluginGenerator
   os << "  static " << vtkClassName << "* New();\n";
   os << "  vtkTypeMacro(" << vtkClassName << ", vtkImageAlgorithm);\n\n";
 
+  os << "  typedef " << vtkClassName << " Self;\n\n";
+
+  os << "  void SetActiveScalar( char * scalar);\n\n";
+
   // Write members
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
     {
@@ -293,6 +329,8 @@ ParaView3PluginGenerator
       os << "    " << enumeration->GetEnumerantName( j ) << " = "
          << enumeration->GetEnumerantValue( j ) << "\n";
       os << "  };\n\n";
+
+      os << "  typedef int " << member->GetTypeName() << ";\n\n";
       }
     
     if ( member->GetNumberOfElements() == 1 )
@@ -436,10 +474,12 @@ ParaView3PluginGenerator
     }
   os << "\n";
 
+  os << "#include <vtkDataArray.h>\n";
   os << "#include <vtkObjectFactory.h>\n";
   os << "#include <vtkImageData.h>\n";
   os << "#include <vtkInformationVector.h>\n";
   os << "#include <vtkInformation.h>\n";
+  os << "#include <vtkPointData.h>\n";
   os << "#include <vtkStreamingDemandDrivenPipeline.h>\n\n";
 
   os << "#include <itkImageToVTKImageFilter.h>\n";
@@ -501,6 +541,12 @@ ParaView3PluginGenerator
   // Destructor
   os << vtkClassName << "::~" << vtkClassName << "()\n";
   os << "{\n";
+  os << "}\n\n";
+
+  // Set active scalar method
+  os << "void " << vtkClassName << "::SetActiveScalar( char * scalar )\n";
+  os << "{\n";
+  os << "  std::cout << \"Setting active scalar to '\" << scalar << \"'\\n\";\n";
   os << "}\n\n";
 
   // RequestUpdateExtent() method
@@ -569,11 +615,24 @@ ParaView3PluginGenerator
 
   if ( classDescription->GetNumberOfInputs() == 1 )
     {
-    os << "#include \"RunOneInput.h\"\n";
+    // TODO - fix hardcoded file name
+    if ( !this->InsertFile( os, "/Users/quammen/dev/packages/ITKPlugins/Generators/ParaView3/RunOneInput.h" ) )
+      {
+      std::cerr << "Could not find file RunOneInput.h" << std::endl;
+      }
+    //os << "#include \"RunOneInput.h\"\n";
     }
   else
     {
+#if 1
+    // TODO - fix hardcoded file name
+    if ( !this->InsertFile( os, "/Users/quammen/dev/packages/ITKPlugins/Generators/ParaView3/RunTwoInputs.h" ) )
+      {
+      std::cerr << "Could not find file RunTwoInputs.h" << std::endl;
+      }
+#else
     os << "#include \"RunTwoInputs.h\"\n";
+#endif
     }
 
   os << "  return (success ? 1 : 0);\n";
@@ -672,7 +731,8 @@ ParaView3PluginGenerator
     {
     const MemberDescription * member = classDescription->GetMemberDescription( i );
     
-    if ( member->GetCustomITKCast() != "<undefined>" && !this->GetClassDescription()->IsEnumerationType( member->GetTypeName() ) )
+    if ( member->GetCustomITKCast() != "<undefined>" &&
+         !this->GetClassDescription()->IsEnumerationType( member->GetTypeName() ) )
       {
       std::string code( member->GetCustomITKCast() );
       code = this->SubstituteString( "this->m_", "", code );
@@ -693,6 +753,8 @@ ParaView3PluginGenerator
         std::string code( member->GetCustomITKCast() );
         code = this->SubstituteString( "this->m_", "", code );
         code = this->SubstituteString( "m_", "", code );
+        code = this->SubstituteString( "ImageBoundaryCondition", "itk::ImageBoundaryCondition", code );
+        code = this->SubstituteString( "CreateNewBoundaryConditionInstance", "itk::simple::CreateNewBoundaryConditionInstance", code );
 
         os << "  " << code << "\n";
         }
