@@ -85,7 +85,7 @@ PluginGenerator
   while ( nextPos != std::string::npos )
     {
     output.replace( nextPos, toFind.size(), toReplace );
-    nextPos = output.find( toFind );
+    nextPos = output.find( toFind, nextPos + toReplace.size() );
     }
 
   return output;
@@ -198,6 +198,31 @@ PluginGenerator
   if ( complexDoubleType ) os << "#define ITK_COMPLEX_DOUBLE_TYPE\n";
 
   return true;
+}
+
+bool
+PluginGenerator
+::InsertFile( std::ostream & os, const std::string & fileName )
+{
+  // Attempt to open the file name
+  std::filebuf fb;
+  if ( fb.open( fileName.c_str(), std::ios::in ) )
+    {
+    std::istream is( &fb );
+
+    // Read the file contents and send to the ostream
+    std::string line;
+    std::getline( is, line );
+    while ( is )
+      {
+      os << "  " << line << "\n";
+      std::getline(is, line);
+      }
+
+    return true;
+    }
+
+  return false;
 }
 
 int

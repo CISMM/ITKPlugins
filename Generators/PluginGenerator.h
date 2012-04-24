@@ -35,6 +35,8 @@ protected:
 
   bool WritePixelTypeDefinitions( std::ostream & os );
 
+  bool InsertFile( std::ostream & os, const std::string & fileName );
+
 private:
   ClassDescription * m_ClassDescription;
   std::string        m_PluginPath;
