@@ -4,6 +4,7 @@
 #include <iostream>
 #include <string>
 
+#include "ITKPluginsConfigure.h"
 #include "ClassDescription.h"
 #include "Enumeration.h"
 #include "MemberDescription.h"
@@ -615,8 +616,7 @@ ParaView3PluginGenerator
 
   if ( classDescription->GetNumberOfInputs() == 1 )
     {
-    // TODO - fix hardcoded file name
-    if ( !this->InsertFile( os, "/Users/quammen/dev/packages/ITKPlugins/Generators/ParaView3/RunOneInput.h" ) )
+    if ( !this->InsertFile( os, ITKPlugins_SOURCE_DIR "/Generators/ParaView3/RunOneInput.h" ) )
       {
       std::cerr << "Could not find file RunOneInput.h" << std::endl;
       }
@@ -625,8 +625,7 @@ ParaView3PluginGenerator
   else
     {
 #if 1
-    // TODO - fix hardcoded file name
-    if ( !this->InsertFile( os, "/Users/quammen/dev/packages/ITKPlugins/Generators/ParaView3/RunTwoInputs.h" ) )
+    if ( !this->InsertFile( os, ITKPlugins_SOURCE_DIR "/Generators/ParaView3/RunTwoInputs.h" ) )
       {
       std::cerr << "Could not find file RunTwoInputs.h" << std::endl;
       }

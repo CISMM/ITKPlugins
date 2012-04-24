@@ -5,11 +5,11 @@ add_custom_command(
     "@PLUGIN_DIRECTORY@/@PLUGIN_NAME@.xml"
   COMMAND
     "${ITKPlugins_BINARY_DIR}/bin/GenerateParaView3Plugin"
-    "/Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/@PLUGIN_NAME@.json"
+    "${SimpleITK_SOURCE_DIR}/Code/BasicFilters/json/@PLUGIN_NAME@.json"
     "@PLUGIN_DIRECTORY@"
   DEPENDS
     GenerateParaView3Plugin
-    /Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/@PLUGIN_NAME@.json
+    ${SimpleITK_SOURCE_DIR}/Code/BasicFilters/json/@PLUGIN_NAME@.json
   WORKING_DIRECTORY "${ITKPlugins_BINARY_DIR}"
   VERBATIM
   )

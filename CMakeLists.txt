@@ -9,6 +9,14 @@ option( BUILD_PARAVIEW3_PLUGINS "Build plugins for ParaView 3.14" OFF )
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${ITKPlugins_BINARY_DIR}/lib )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ITKPlugins_BINARY_DIR}/bin )
 
+# SimpleITK is required. It need only be configured, not build.
+find_package( SimpleITK )
+include( ${SimpleITK_USE_FILE} )
+
+# Find the SimpleITK source directory
+FILE( READ "${SimpleITK_DIR}/CMakeCache.txt" SimpleITK_CMAKE_CACHE )
+STRING( REGEX REPLACE ".*SimpleITK_SOURCE_DIR:STATIC=([^\n]+).*" "\\1" SimpleITK_SOURCE_DIR ${SimpleITK_CMAKE_CACHE} )
+
 #######################################
 # Quiet warnings from the JSON library.
 #######################################
@@ -19,6 +27,14 @@ if ( CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
   add_definitions( -DNDEBUG )
 endif()
 
+# Configure the ITKPluginsConfigure.h file
+configure_file( "${ITKPlugins_SOURCE_DIR}/ITKPluginsConfigure.h.in"
+  "${ITKPlugins_BINARY_DIR}/ITKPluginsConfigure.h" @ONLY
+  )
+
+include_directories( "${ITKPlugins_BINARY_DIR}" )
+
+# Add all the subdirectories
 add_subdirectory( Common )
 add_subdirectory( Generators )
 add_subdirectory( Parser )

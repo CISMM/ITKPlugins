@@ -1,5 +1,5 @@
 include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/Slicer4" )
-include_directories( "/Users/quammen/dev/build/SimpleITK-build" )
+include_directories( "${SimpleITK_DIR}" )
 
 set( GENERATED_CODE_DIRECTORY "${ITKPlugins_BINARY_DIR}/GeneratedCode/Slicer4" )
 
@@ -11,7 +11,7 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
 
     add_custom_command( OUTPUT "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.cxx"
       COMMAND "${ITKPlugins_BINARY_DIR}/bin/GenerateSlicer4Plugin"
-        "/Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json"
+        "${SimpleITK_SOURCE_DIR}/Code/BasicFilters/json/${PLUGIN_NAME}.json"
         "${GENERATED_CODE_DIRECTORY}"
         "--cxx"
       DEPENDS GenerateSlicer4Plugin
@@ -21,7 +21,7 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
 
    add_custom_command( OUTPUT "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
       COMMAND "${ITKPlugins_BINARY_DIR}/bin/GenerateSlicer4Plugin"
-        "/Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json"
+        "${SimpleITK_SOURCE_DIR}/Code/BasicFilters/json/${PLUGIN_NAME}.json"
         "${GENERATED_CODE_DIRECTORY}"
         "--xml"
       DEPENDS GenerateSlicer4Plugin

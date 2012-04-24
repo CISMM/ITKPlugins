@@ -1,6 +1,6 @@
 include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/ParaView3" )
-include_directories( "/Users/quammen/dev/build/SimpleITK-build" )
-include_directories( ${ITK_INCLUDE_DIRS} )
+include_directories( "${SimpleITK_DIR}" )
+include_directories( "${ITK_INCLUDE_DIRS}" )
 
 set( GENERATED_CODE_DIRECTORY "${ITKPlugins_BINARY_DIR}/GeneratedCode/ParaView3" )
 
@@ -8,37 +8,23 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
 
   set( VTK_FILE_PREFIX "vtkITK${PLUGIN_NAME}ImageFilter" )
 
-  add_custom_command(
-    OUTPUT
-      "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.h"
-      "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
-      "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
-    COMMAND
-      "${ITKPlugins_BINARY_DIR}/bin/GenerateParaView3Plugin"
-      "/Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json"
-      "${GENERATED_CODE_DIRECTORY}"
-    DEPENDS
-      GenerateParaView3Plugin
-      /Users/quammen/dev/packages/SimpleITK/Code/BasicFilters/json/${PLUGIN_NAME}.json
-    WORKING_DIRECTORY "${ITKPlugins_BINARY_DIR}"
-    VERBATIM
-    )
+  # Each plugin has its own directory. I'm not sure if this is needed,
+  # but it may solve a problem I'm having with ParaView sometimes not
+  # loading plugins.
+  set( PLUGIN_DIRECTORY "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}" )
+  file( MAKE_DIRECTORY "${PLUGIN_DIRECTORY}" )
 
   set( GENERATED_SOURCE_FILES "${GENERATED_SOURCE_FILES}"
-    "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.h"
-    "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
-    "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
+    "${PLUGIN_DIRECTORY}/${VTK_FILE_PREFIX}.h"
+    "${PLUGIN_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
+    "${PLUGIN_DIRECTORY}/${PLUGIN_NAME}.xml"
     )
 
-  add_paraview_plugin( ${PLUGIN_NAME} "1.0"
-    SERVER_MANAGER_XML "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}.xml"
-    SERVER_MANAGER_SOURCES
-      "${GENERATED_CODE_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
-    )
+  # Generate plugin CMakeLists.txt file here
+  configure_file( "PluginCMakeLists.txt.in"
+    "${PLUGIN_DIRECTORY}/CMakeLists.txt" @ONLY )
 
-  target_link_libraries( ${PLUGIN_NAME}
-    ${ITK_LIBRARIES}
-    )
+  add_subdirectory( "${PLUGIN_DIRECTORY}" "${PLUGIN_DIRECTORY}" )
 
 endforeach()
 
