@@ -1,0 +1,6 @@
+#ifndef _ITKPluginsConfigure_h_
+#define _ITKPluginsConfigure_h_
+
+#define ITKPlugins_SOURCE_DIR "@ITKPlugins_SOURCE_DIR@"
+
+#endif
