@@ -42,10 +42,3 @@ add_dependencies( @PLUGIN_NAME@ "@PLUGIN_DIRECTORY@/@VTK_FILE_PREFIX@.cxx" )
 target_link_libraries( @PLUGIN_NAME@
   ${ITK_LIBRARIES}
   )
-
-add_custom_target( @PLUGIN_NAME@_CustomTarget ALL
-  DEPENDS
-    "@PLUGIN_DIRECTORY@/@VTK_FILE_PREFIX@.h"
-    "@PLUGIN_DIRECTORY@/@VTK_FILE_PREFIX@.cxx"
-    "@PLUGIN_DIRECTORY@/@PLUGIN_NAME@.xml"
-  )
