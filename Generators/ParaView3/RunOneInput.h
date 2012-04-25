@@ -19,8 +19,15 @@ if (!output)
   }
 
 // This probably isn't the way to do this properly, but it works
-const char* activeScalarName = this->GetInputArrayToProcess(0, input)->GetName();
-input->GetPointData()->SetActiveScalars( activeScalarName );
+if ( this->GetInputArrayToProcess(0, input) )
+  {
+  const char* activeScalarName = this->GetInputArrayToProcess(0, input)->GetName();
+  input->GetPointData()->SetActiveScalars( activeScalarName );
+  }
+else
+  {
+  vtkErrorMacro(<< "GetInputArrayToProcess(0, input) returned a NULL scalar field name.");
+  }
 
 bool success = true;
 switch( input->GetScalarType() )
