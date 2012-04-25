@@ -27,7 +27,3 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
   add_subdirectory( "${PLUGIN_DIRECTORY}" "${PLUGIN_DIRECTORY}" )
 
 endforeach()
-
-add_custom_target( ParaViewSource ALL ls
-  DEPENDS ${GENERATED_SOURCE_FILES}
-  )
