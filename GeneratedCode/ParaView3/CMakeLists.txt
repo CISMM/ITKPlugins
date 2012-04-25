@@ -14,15 +14,12 @@ foreach( PLUGIN_NAME ${Plugin_JSON} )
   set( PLUGIN_DIRECTORY "${GENERATED_CODE_DIRECTORY}/${PLUGIN_NAME}" )
   file( MAKE_DIRECTORY "${PLUGIN_DIRECTORY}" )
 
-  set( GENERATED_SOURCE_FILES "${GENERATED_SOURCE_FILES}"
-    "${PLUGIN_DIRECTORY}/${VTK_FILE_PREFIX}.h"
-    "${PLUGIN_DIRECTORY}/${VTK_FILE_PREFIX}.cxx"
-    "${PLUGIN_DIRECTORY}/${PLUGIN_NAME}.xml"
-    )
-
   # Generate plugin CMakeLists.txt file here
   configure_file( "PluginCMakeLists.txt.in"
     "${PLUGIN_DIRECTORY}/CMakeLists.txt" @ONLY )
+  configure_file( "ITKPluginsGUI.xml.in"
+    "${PLUGIN_DIRECTORY}/ITKPluginsGUI.xml"
+    )
 
   add_subdirectory( "${PLUGIN_DIRECTORY}" "${PLUGIN_DIRECTORY}" )
 

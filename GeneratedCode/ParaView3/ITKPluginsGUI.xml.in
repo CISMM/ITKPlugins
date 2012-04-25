@@ -1,0 +1,6 @@
+<ParaViewFilters>
+    <Category name="ITK" menu_label="&amp;ITK">
+      <!-- adds a new category and then adds our filter to it -->
+      <Filter name="@PLUGIN_NAME@" />
+    </Category>
+  </ParaViewFilters>
