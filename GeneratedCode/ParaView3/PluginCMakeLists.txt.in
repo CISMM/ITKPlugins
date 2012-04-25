@@ -37,7 +37,11 @@ file( REMOVE
   "@PLUGIN_DIRECTORY@/@PLUGIN_NAME@.xml"
   )
 
-add_dependencies( @PLUGIN_NAME@ "@PLUGIN_DIRECTORY@/@VTK_FILE_PREFIX@.cxx" )
+add_dependencies( @PLUGIN_NAME@
+  "@PLUGIN_DIRECTORY@/@VTK_FILE_PREFIX@.cxx"
+  "${ITKPlugins_SOURCE_DIR}/Generators/ParaView3/RunOneInput.h"
+  "${ITKPlugins_SOURCE_DIR}/Generators/ParaView3/RunTwoInputs.h"
+  )
 
 target_link_libraries( @PLUGIN_NAME@
   ${ITK_LIBRARIES}
