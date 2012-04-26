@@ -8,6 +8,11 @@ option( BUILD_PARAVIEW3_PLUGINS "Build plugins for ParaView 3.14" OFF )
 
 set( CMAKE_LIBRARY_OUTPUT_DIRECTORY ${ITKPlugins_BINARY_DIR}/lib )
 set( CMAKE_RUNTIME_OUTPUT_DIRECTORY ${ITKPlugins_BINARY_DIR}/bin )
+if ( "${CMAKE_CFG_INTDIR}" STREQUAL "." )
+  set( ITKPlugins_EXECUTABLE_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY} )
+else ()
+  set( ITKPlugins_EXECUTABLE_DIR ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_CFG_INTDIR} )
+endif()
 
 # Find the SimpleITK source directory
 find_path( SimpleITK_SOURCE_DIR
@@ -25,7 +30,8 @@ endif()
 if ( CMAKE_BUILD_TYPE STREQUAL "Debug" )
   add_definitions( -DJSON_DEBUG )
 endif()
-if ( CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" )
+if ( CMAKE_BUILD_TYPE STREQUAL "RelWithDebInfo" OR
+     CMAKE_BUILD_TYPE STREQUAL "Release" )
   add_definitions( -DNDEBUG )
 endif()
 
