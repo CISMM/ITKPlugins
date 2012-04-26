@@ -9,6 +9,8 @@
 #include "Enumeration.h"
 #include "MemberDescription.h"
 
+#include "sitkConfigure.h"
+
 ParaView3PluginGenerator
 ::ParaView3PluginGenerator()
 {
@@ -465,8 +467,19 @@ ParaView3PluginGenerator
   os << "#include <itk" << itkClassName << ".h>\n";
   os << "#include <" << vtkClassName << ".h>\n\n";
 
+#ifdef SITK_HAS_STLTR1_TR1_FUNCTIONAL
   os << "#include <tr1/functional>\n";
-  os << "#include <tr1/type_traits>\n\n";
+#endif
+#ifdef SITK_HAS_STLTR1_FUNCTIONAL
+  os << "#include <functional>\n";
+#endif
+#ifdef SITK_HAS_STLTR1_TR1_TYPE_TRAITS
+  os << "#include <tr1/type_traits>\n";
+#endif
+#ifdef SITK_HAS_STLTR1_TYPE_TRAITS
+  os << "#include <type_traits>\n";
+#endif
+  os << "\n";
 
   // Add additional files requested in the ClassDescription
   for ( int i = 0; i < this->GetClassDescription()->GetNumberOfIncludeFiles(); ++i )
