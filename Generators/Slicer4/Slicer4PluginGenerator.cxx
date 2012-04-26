@@ -427,7 +427,7 @@ Slicer4PluginGenerator
         {
         // Convert from enum name to enum value
         const Enumeration * enumeration = this->GetClassDescription()->GetEnumeration( member->GetTypeName() );
-        os << "\n  " << enumeration->GetName() << " tmp" << member->GetMemberName() << ";\n";
+        os << "\n  Self::" << enumeration->GetName() << " tmp" << member->GetMemberName() << ";\n";
 
 
         for ( int i = 0; i < enumeration->GetNumberOfEnumerants(); ++i )
@@ -443,7 +443,7 @@ Slicer4PluginGenerator
           //os << "    filter->Set" << member->GetMemberName() << "(
           //FilterType::" << enumeration->GetEnumerantName( i ) << "
           //);\n";
-          os << "    tmp" << member->GetMemberName() << " = " << enumeration->GetEnumerantName( i ) << ";\n";
+          os << "    tmp" << member->GetMemberName() << " = Self::" << enumeration->GetEnumerantName( i ) << ";\n";
           os << "    }\n";
           }
         os << "  else\n";
@@ -458,6 +458,9 @@ Slicer4PluginGenerator
           std::string code( member->GetCustomITKCast() );
           code = this->SubstituteString( "this->m_", "tmp", code );
           code = this->SubstituteString( "m_", "tmp", code );
+          code = this->SubstituteString( "ImageBoundaryCondition", "itk::ImageBoundaryCondition", code );
+          code = this->SubstituteString( "CreateNewBoundaryConditionInstance", "itk::simple::CreateNewBoundaryConditionInstance", code );
+
 
           os << "  " << code << "\n";
           }
@@ -493,6 +496,9 @@ void
 Slicer4PluginGenerator
 ::WriteEnumerationCode( std::ostream & os )
 {
+  os << "class Self {\n";
+  os << "public:\n\n";
+
   for ( int i = 0; i < this->GetClassDescription()->GetNumberOfEnumerations(); ++i )
     {
     const Enumeration * enumeration = this->GetClassDescription()->GetEnumeration( i );
@@ -510,4 +516,6 @@ Slicer4PluginGenerator
 
     os << "} " << enumeration->GetName() << ";\n\n";
     }
+
+  os << "};\n\n";
 }
