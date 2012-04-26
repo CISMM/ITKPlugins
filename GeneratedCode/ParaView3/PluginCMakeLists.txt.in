@@ -22,11 +22,6 @@ file( WRITE "@PLUGIN_DIRECTORY@/@VTK_FILE_PREFIX@.h" "" )
 file( WRITE "@PLUGIN_DIRECTORY@/@VTK_FILE_PREFIX@.cxx" "" )
 file( WRITE "@PLUGIN_DIRECTORY@/@PLUGIN_NAME@.xml" "" )
 
-# Turn off security warnings in MSVC
-if( MSVC )
-  add_definitions( -D_SCL_SECURE_NO_WARNINGS )
-endif()
-
 add_paraview_plugin( @PLUGIN_NAME@ "1.0"
   SERVER_MANAGER_XML "@PLUGIN_DIRECTORY@/@PLUGIN_NAME@.xml"
   SERVER_MANAGER_SOURCES

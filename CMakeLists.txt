@@ -24,6 +24,11 @@ if (NOT SimpleITK_SOURCE_DIR)
   message( ERROR "Could not find CMakeLists.txt file for SimpleITK" )
 endif()
 
+# Turn off security warnings in MSVC
+if( MSVC )
+  add_definitions( -D_SCL_SECURE_NO_WARNINGS )
+endif()
+
 #######################################
 # Quiet warnings from the JSON library.
 #######################################
