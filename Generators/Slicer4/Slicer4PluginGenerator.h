@@ -23,8 +23,6 @@ public:
 protected:
 
 private:
-  bool WritePixelTypeDefinitions( std::ostream & os );
-
   void WriteEnumerationCode( std::ostream & os );
 
 };
