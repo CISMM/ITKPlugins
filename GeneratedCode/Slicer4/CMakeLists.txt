@@ -1,5 +1,4 @@
 include_directories( "${ITKPlugins_SOURCE_DIR}/Generators/Slicer4" )
-include_directories( "${SimpleITK_DIR}" )
 
 set( GENERATED_CODE_DIRECTORY "${ITKPlugins_BINARY_DIR}/GeneratedCode/Slicer4" )
 
