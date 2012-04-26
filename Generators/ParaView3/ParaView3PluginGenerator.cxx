@@ -499,6 +499,13 @@ ParaView3PluginGenerator
   os << "#include <itkImageToVTKImageFilter.h>\n";
   os << "#include <itkVTKImageToImageFilter.h>\n\n";
 
+#ifdef WIN32
+  // This is probably bad, but it makes up for the fact that stdint.h
+  // isn't available in Visual Studio.
+  os << "typedef unsigned char uint8_t;\n";
+  os << "typedef unsigned int  uint32_t;\n\n";
+#endif
+
   this->WritePixelTypeDefinitions( os );
   os << "\n";
 
@@ -673,7 +680,8 @@ ParaView3PluginGenerator
   if ( this->GetClassDescription()->GetOutputPixelType() != "" )
     {
     // Custom pixel type
-    os << "  typedef itk::Image< " << this->GetClassDescription()->GetOutputPixelType() << ", 3 > OutputImageType;\n";
+    std::string outputPixelType = this->GetClassDescription()->GetOutputPixelType();
+    os << "  typedef itk::Image< " << outputPixelType << ", 3 > OutputImageType;\n";
     }
   else
     {
