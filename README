@@ -22,8 +22,99 @@ cquammen@cs.unc.edu
 Department of Computer Science
 UNC Chapel Hill
 
+Funding provided by:
+
+ARRA - Adding Deconvolution Algorithms to ITK
+Award No: A10-1515-002
+Sponsor Award No: HHSN276201000581P
+Awarding Agency: National Library of Medicine
+
 Acknowledgements
 ----------------
 
 The ITK Plugins project uses the JSON description files in the
 SimpleITK project.
+
+Build Instructions
+------------------
+
+ITKPlugins can be configured to build plugins for either Slicer4 or
+ParaView. Currently, only one or the other can be built in the same
+build directory, not both.
+
+Mac OS X - ParaView3 plugins 
+--------------------------
+
+1. Clone, configure, and build ParaView
+
+ git clone --recursive git://paraview.org/ParaView.git
+ mkdir ParaView-build
+ cd ParaView-build
+ cmake ../ParaView
+ make
+ cd ..
+
+2. Clone SimpleITK
+
+ git clone git://itk.org/SimpleITK.git
+
+3. Clone, configure, and build ITK
+
+ git clone git://itk.org/ITK.git
+ mkdir ITK-build
+ cd ITK-build
+ cmake ../ITK -DBUILD_EXAMPLES:BOOL=OFF -DBUILD_SHARED_LIBS:BOOL=OFF -DBUILD_TESTING:BOOL=OFF -DModule_ITKVtkGlue:BOOL=ON -DVTK_DIR:PATH=../ParaView-build/VTK
+ make
+ cd ..
+
+4. Clone, configure, and build ITKPlugins
+
+ git clone git://github.com/cquammen/ITKPlugins.git
+ mkdir ITKPlugins-build
+ cd ITKPlugins-build
+ cmake ../ITKPlugins -DBUILD_PARAVIEW3_PLUGINS:BOOL=ON -DSimpleITK_SOURCE_DIR:PATH=../SimpleITK -DParaView_DIR:PATH=../ParaView-build
+ make
+ cd ..
+
+Mac OS X - Slicer4 plugins
+--------------------------
+
+1. Clone, configure, and build Slicer 4
+
+ git clone git://github.com/Slicer/Slicer.git
+ cd Slicer
+ git svn init http://svn.slicer.org/Slicer4/trunk
+ git update-ref refs/remotes/git-svn refs/remotes/origin/master
+ git checkout master
+ git svn rebase
+
+ cd ..
+ mkdir Slicer4-SuperBuild
+ cd Slicer4-SuperBuild
+ cmake -DQT_QMAKE_EXECUTABLE:FILEPATH=/path/to/QtSDK-1.2/Desktop/Qt/474/gcc/bin/qmake ../Slicer4
+ make
+ cd ..
+
+2. 2. Clone SimpleITK
+
+ git clone git://itk.org/SimpleITK.git
+
+3. Clone, configure, and build ITKPlugins
+
+ git clone git://github.com/cquammen/ITKPlugins.git
+ mkdir ITKPlugins-build
+ cd ITKPlugins-build
+ cmake ../ITKPlugins -DBUILD_PARAVIEW3_PLUGINS:BOOL=ON -DSimpleITK_SOURCE_DIR:PATH=../SimpleITK -DParaView_DIR:PATH=../ParaView-build
+ make
+ cd ..
+
+
+Windows - ParaView3 plugins
+---------------------------
+
+TBD
+
+Windows - Slicer4 plugins
+-------------------------
+
+TBD
