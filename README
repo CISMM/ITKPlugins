@@ -112,9 +112,47 @@ Mac OS X - Slicer4 plugins
 Windows - ParaView3 plugins
 ---------------------------
 
-TBD
+You must use Visual Studio 2008 or higher.
+
+1. Install an implementation of stdint.h in
+
+C:\Program Files (x86)\Microsoft Visual Studio 9.0\VC\include
+
+You can download one from http://msinttypes.googlecode.com/svn/trunk/stdint.h
+
+2. Be sure to install Microsoft Visual Studio 2008 Service Pack 1 if it has not been installed already.
+You can do so here: http://www.microsoft.com/en-us/download/details.aspx?id=23691
+
+3. Clone, configure, and build ParaView
+
+ git clone --recursive git://paraview.org/ParaView.git
+
+Configure with CMake. Make sure BUILD_SHARED=ON.
+
+4. Clone SimpleITK
+
+ git clone git://itk.org/SimpleITK.git
+
+5. Clone, configure, and build ITK with the following CMake configuration settings:
+
+ BUILD_EXAMPLES=OFF
+ BUILD_SHARED_LIBS=OFF
+ BUILD_TESTING=OFF
+ Module_ITKVtkGlue=ON
+ VTK_DIR=<path to VTK directory in the ParaView build directory created in step 3>
+
+6. Clone, configure, and build ITKPlugins with the following CMake configuration settings:
+
+ git clone git://github.com/cquammen/ITKPlugins.git
+
+  BUILD_PARAVIEW3_PLUGINS=ON
+  SimpleITK_SOURCE_DIR=<path to SimpleITK *source* directory>
+  ParaView_DIR=<path to ParaView *build* directory>
+
+Note that the SimpleITK_SOURCE_DIR should point to the SimpleITK source directory and the
+ParaView_DIR should point to the ParaView build directory.
 
 Windows - Slicer4 plugins
 -------------------------
 
-TBD
+TODO
