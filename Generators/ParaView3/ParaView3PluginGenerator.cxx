@@ -82,10 +82,14 @@ ParaView3PluginGenerator
      << classDescription->GetPluginName() << "ImageFilter\" label=\""
      << this->SplitCAMLCaseString( classDescription->GetPluginName() ) << "\">\n";
 
+  std::string shortHelp = classDescription->GetBriefDescription();
+  shortHelp = this->SubstituteString( "\n", "\\n",  shortHelp);
+  shortHelp = this->SubstituteString( "\"", "&quot;", shortHelp);
+
   os << "      <Documentation\n";
   os << "        long_help=\"\"\n"; // Should put detailed description here
   os << "        short_help=\""
-     << this->SubstituteString( "\n", "\\n", classDescription->GetBriefDescription() ) << "\">\n";
+     << shortHelp << "\">\n";
   os << "      </Documentation>\n\n";
   
   // Write input descriptions
