@@ -226,12 +226,14 @@ ParaView3PluginGenerator
         }
       }
 
-    if ( this->IsBoolVectorType( typeName ) )
+    bool isVectorType = this->IsBoolVectorType( typeName );
+    if ( isVectorType )
       {
       os << "        <BooleanDomain name=\"bool\"/>\n";
       }
 
-    if ( classDescription->IsEnumerationType( typeName ) )
+    bool isEnumerationType = classDescription->IsEnumerationType( typeName );
+    if ( isEnumerationType )
       {
       os << "        <EnumerationDomain name=\"enum\">\n";
       
@@ -246,7 +248,10 @@ ParaView3PluginGenerator
       }
 
     // Finish the XML element
-    os << "        <" << xmlRangeDomainName << " name=\"range\"/>\n\n";
+    if ( !isVectorType && !isEnumerationType )
+      {
+      os << "        <" << xmlRangeDomainName << " name=\"range\"/>\n\n";
+      }
 
     os << "      </" << xmlTypeName << ">\n\n";
 
