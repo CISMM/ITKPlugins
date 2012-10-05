@@ -143,7 +143,7 @@ ParaView3PluginGenerator
       }
     os << "\">\n";
     os << "        <ArrayListDomain\n";
-    os << "           name=\"fieldName\"\n";
+    os << "           name=\"array_list\"\n";
     os << "           attribute_type=\"Scalars\"\n";
     os << "           input_domain_name=\"input_array" << i+1 << "\">\n";
     os << "          <RequiredProperties>\n";
@@ -170,14 +170,17 @@ ParaView3PluginGenerator
 
     std::string typeName = member->GetTypeName();
     std::string xmlTypeName;
+    std::string xmlRangeDomainName;
     
     if ( this->IsIntVectorType( typeName ) || classDescription->IsEnumerationType( typeName ) )
       {
       xmlTypeName = "IntVectorProperty";
+      xmlRangeDomainName = "IntRangeDomain";
       }
     else if ( this->IsDoubleVectorType( typeName ) )
       {
       xmlTypeName = "DoubleVectorProperty";
+      xmlRangeDomainName = "DoubleRangeDomain";
       }
     else
       {
@@ -243,6 +246,8 @@ ParaView3PluginGenerator
       }
 
     // Finish the XML element
+    os << "        <" << xmlRangeDomainName << " name=\"range\"/>\n\n";
+
     os << "      </" << xmlTypeName << ">\n\n";
 
     }
