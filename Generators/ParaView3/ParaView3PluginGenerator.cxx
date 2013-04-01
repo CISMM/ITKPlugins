@@ -135,6 +135,8 @@ ParaView3PluginGenerator
     os << "          command=\"SetInputArrayToProcess\"\n";
     os << "          number_of_elements=\"5\"\n";
     os << "          element_types=\"0 0 0 0 2\"\n";
+    os << "          default_value=\"" << i << "," << i << "\"\n";
+    os << "          default_values_delimiter=\",\"\n";
     os << "          animateable=\"0\"\n";
     os << "          label=\"Scalar to Process";
     if ( this->GetNumberOfInputs() > 1 )
@@ -324,8 +326,6 @@ ParaView3PluginGenerator
   os << "  vtkTypeMacro(" << vtkClassName << ", vtkImageAlgorithm);\n\n";
 
   os << "  typedef " << vtkClassName << " Self;\n\n";
-
-  os << "  void SetActiveScalar( char * scalar);\n\n";
 
   // Write members
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
@@ -533,8 +533,6 @@ ParaView3PluginGenerator
   os << "  this->SetNumberOfInputPorts(" << classDescription->GetNumberOfInputs() << ");\n";
   os << "  this->SetNumberOfOutputPorts(1);\n\n";
 
-  //os << "  this->Init();\n";
-
   // Initialize default values
   for ( int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i )
     {
@@ -571,17 +569,19 @@ ParaView3PluginGenerator
       }
     }
 
+  // Set the expected input arrays
+  for ( int i = 0; i < classDescription->GetNumberOfInputs(); ++i )
+    {
+    os << "  this->SetInputArrayToProcess(" << i << "," << i
+       << ",0,vtkDataObject::FIELD_ASSOCIATION_POINTS,\n"
+       << "    vtkDataSetAttributes::SCALARS);\n";
+    }
+
   os << "}\n\n";
 
   // Destructor
   os << vtkClassName << "::~" << vtkClassName << "()\n";
   os << "{\n";
-  os << "}\n\n";
-
-  // Set active scalar method
-  os << "void " << vtkClassName << "::SetActiveScalar( char * scalar )\n";
-  os << "{\n";
-  os << "  std::cout << \"Setting active scalar to '\" << scalar << \"'\\n\";\n";
   os << "}\n\n";
 
   // RequestUpdateExtent() method
