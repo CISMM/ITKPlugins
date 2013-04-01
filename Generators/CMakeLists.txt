@@ -13,6 +13,6 @@ if ( BUILD_SLICER4_PLUGINS )
 endif()
 
 if ( BUILD_PARAVIEW3_PLUGINS )
-  message( "Building ParaView plugins enabled..." )
+  message( STATUS "Building ParaView plugins enabled..." )
   add_subdirectory( ParaView3 )
 endif()

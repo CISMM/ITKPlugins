@@ -79,7 +79,7 @@ ParaView3PluginGenerator
   os << "  <ProxyGroup name=\"filters\">\n";
 
   os << "    <SourceProxy name=\"" << classDescription->GetPluginName() << "\" class=\"vtkITK"
-     << classDescription->GetPluginName() << "ImageFilter\" label=\""
+     << classDescription->GetPluginName() << "\" label=\""
      << this->SplitCAMLCaseString( classDescription->GetPluginName() ) << "\">\n";
 
   std::string shortHelp = classDescription->GetBriefDescription();
@@ -91,7 +91,7 @@ ParaView3PluginGenerator
   os << "        short_help=\""
      << shortHelp << "\">\n";
   os << "      </Documentation>\n\n";
-  
+
   // Write input descriptions
   for (int i = 0; i < this->GetNumberOfInputs(); ++i)
     {
@@ -171,7 +171,7 @@ ParaView3PluginGenerator
     std::string typeName = member->GetTypeName();
     std::string xmlTypeName;
     std::string xmlRangeDomainName;
-    
+
     if ( this->IsIntVectorType( typeName ) || classDescription->IsEnumerationType( typeName ) )
       {
       xmlTypeName = "IntVectorProperty";
@@ -236,7 +236,7 @@ ParaView3PluginGenerator
     if ( isEnumerationType )
       {
       os << "        <EnumerationDomain name=\"enum\">\n";
-      
+
       const Enumeration * enumeration = classDescription->GetEnumeration( typeName );
       for (int j = 0; j < enumeration->GetNumberOfEnumerants(); ++j )
         {
@@ -349,7 +349,7 @@ ParaView3PluginGenerator
 
       os << "  typedef int " << member->GetTypeName() << ";\n\n";
       }
-    
+
     if ( member->GetNumberOfElements() == 1 )
       {
       os << "  // Set/get " << member->GetMemberName() << " variable\n";
@@ -375,7 +375,7 @@ ParaView3PluginGenerator
     else
       {
       os << "  // Set/get " << member->GetMemberName() << " variable\n";
-      os << "  vtkSetVectorMacro(" << member->GetMemberName() << ", " 
+      os << "  vtkSetVectorMacro(" << member->GetMemberName() << ", "
          << this->GetVTKTypeName( member->GetTypeName() )
          << ", " << member->GetNumberOfElements() << ");\n";
       os << "  vtkGetVectorMacro(" << member->GetMemberName() << ", "
@@ -546,7 +546,7 @@ ParaView3PluginGenerator
       }
     else
       {
-      int numberOfElements = member->GetNumberOfElements(); 
+      int numberOfElements = member->GetNumberOfElements();
       if ( numberOfElements == 1 )
         {
         os << "  this->" << member->GetMemberName() << " = " << member->GetDefaultValue();
@@ -569,7 +569,7 @@ ParaView3PluginGenerator
           }
         }
       }
-    }    
+    }
 
   os << "}\n\n";
 
@@ -592,7 +592,7 @@ ParaView3PluginGenerator
   os << "{\n";
 
   os << "  int inWExt[6];\n";
-  
+
   for (int i = 0; i < classDescription->GetNumberOfInputs(); ++i)
     {
     os << "  vtkInformation *inInfo" << i << " = inputVector[" << i << "]->GetInformationObject(0);\n";
@@ -759,7 +759,7 @@ ParaView3PluginGenerator
   for (int i = 0; i < classDescription->GetNumberOfMemberDescriptions(); ++i)
     {
     const MemberDescription * member = classDescription->GetMemberDescription( i );
-    
+
     if ( member->GetCustomITKCast() != "<undefined>" &&
          !this->GetClassDescription()->IsEnumerationType( member->GetTypeName() ) )
       {
@@ -804,7 +804,7 @@ ParaView3PluginGenerator
       // Turn bools into ints
       if ( member->GetElementTypeName() == "bool" )
         {
-        int numberOfElements = member->GetNumberOfElements(); 
+        int numberOfElements = member->GetNumberOfElements();
         if ( numberOfElements == 1 )
           {
           os << "  filter->Set" << member->GetMemberName() << "(this->Get" << member->GetMemberName() << "() != 0);\n\n";
@@ -877,7 +877,6 @@ ParaView3PluginGenerator
 ::GetITKClassName()
 {
   std::string filterName( this->GetClassDescription()->GetPluginName() );
-  filterName.append( "ImageFilter" );
 
   // Override the filter name if it is explicit in the JSON file
   if ( this->GetClassDescription()->GetITKClassName() != "" )
@@ -896,7 +895,6 @@ ParaView3PluginGenerator
   const ClassDescription * classDescription = this->GetClassDescription();
   std::string vtkClassName( "vtkITK" );
   vtkClassName.append( classDescription->GetPluginName() );
-  vtkClassName.append( "ImageFilter" );
 
   return vtkClassName;
 }
