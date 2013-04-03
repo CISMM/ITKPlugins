@@ -42,10 +42,10 @@ ITKPlugins can be configured to build plugins for either Slicer4 or
 ParaView. Currently, only one or the other can be built in the same
 build directory, not both.
 
-Mac OS X - ParaView3 plugins 
+Mac OS X - ParaView3 plugins
 --------------------------
 
-1. Clone, configure, and build ParaView
+1. Clone, configure, and build ParaView (3.98.1 or higher is required)
 
  git clone --recursive git://paraview.org/ParaView.git
  mkdir ParaView-build
@@ -54,11 +54,11 @@ Mac OS X - ParaView3 plugins
  make
  cd ..
 
-2. Clone SimpleITK
+2. Clone SimpleITK (0.6.1 or higher is required)
 
  git clone git://itk.org/SimpleITK.git
 
-3. Clone, configure, and build ITK
+3. Clone, configure, and build ITK (4.3.1 or higher is required)
 
  git clone git://itk.org/ITK.git
  mkdir ITK-build
@@ -95,7 +95,7 @@ Mac OS X - Slicer4 plugins
  make
  cd ..
 
-2. 2. Clone SimpleITK
+2. Clone SimpleITK (0.6.1 or higher is required)
 
  git clone git://itk.org/SimpleITK.git
 
