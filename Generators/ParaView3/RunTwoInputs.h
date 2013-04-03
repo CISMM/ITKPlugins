@@ -25,8 +25,15 @@ if (!output)
   return 0;
   }
 
-bool success = true;
+// Set the active scalar array in the inputs. Normally, this would be
+// done in the filter that imports the VTK image into ITK, but that
+// filter doesn't expose a way to set the active scalar in the interface.
+char * activeArrayName0 = this->GetInputArrayToProcess( 0, input0 )->GetName();
+input0->GetPointData()->SetActiveScalars( activeArrayName0 );
+char * activeArrayName1 = this->GetInputArrayToProcess( 1, input1 )->GetName();
+input1->GetPointData()->SetActiveScalars( activeArrayName1 );
 
+bool success = true;
 switch ( input0->GetScalarType() )
   {
 #ifdef ITK_UCHAR_TYPE

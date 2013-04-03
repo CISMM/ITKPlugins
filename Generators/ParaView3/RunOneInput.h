@@ -18,8 +18,14 @@ if (!output)
   return 0;
   }
 
+// Set the active scalar array in the inputs. Normally, this would be
+// done in the filter that imports the VTK image into ITK, but that
+// filter doesn't expose a way to set the active scalar in the interface.
+char * activeArrayName0 = this->GetInputArrayToProcess( 0, input )->GetName();
+input->GetPointData()->SetActiveScalars( activeArrayName0 );
+
 bool success = true;
-switch( input->GetScalarType() )
+switch( input->GetPointData()->GetScalars()->GetDataType() )
   {
 #ifdef ITK_UCHAR_TYPE
   case VTK_UNSIGNED_CHAR:
